@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A parcel box with a check mark, drawn inside the 66dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- box body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,44 L74,44 L74,76 Q74,78 72,78 L36,78 Q34,78 34,76 Z" />
+    <!-- box lid -->
+    <path
+        android:fillColor="#E3EEF6"
+        android:pathData="M31,34 L77,34 L77,44 L31,44 Z" />
+    <!-- check mark -->
+    <path
+        android:strokeColor="#1F5E8C"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M44,61 L51,68 L65,54" />
+</vector>
