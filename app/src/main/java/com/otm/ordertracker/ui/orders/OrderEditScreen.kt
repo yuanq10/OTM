@@ -41,25 +41,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.otm.ordertracker.data.model.Product
-import com.otm.ordertracker.ui.AppViewModelProvider
 import com.otm.ordertracker.ui.common.Money
 import com.otm.ordertracker.ui.common.ProductPrice
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewOrderScreen(
+fun OrderEditScreen(
     onBack: () -> Unit,
-    onCreated: (String) -> Unit,
+    /** Called with the order's id after it is created or saved. */
+    onSaved: (String) -> Unit,
     onNewCustomer: () -> Unit,
-    viewModel: NewOrderViewModel,
+    viewModel: OrderEditViewModel,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("New order") },
+                title = { Text(if (viewModel.isNew) "New order" else "Edit order") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -78,10 +77,10 @@ fun NewOrderScreen(
                     )
                 }
                 Button(
-                    onClick = { viewModel.save()?.let(onCreated) },
+                    onClick = { viewModel.save()?.let(onSaved) },
                     enabled = state.canSave,
                     modifier = Modifier.padding(end = 16.dp),
-                ) { Text("Create order") }
+                ) { Text(if (viewModel.isNew) "Create order" else "Save changes") }
             }
         },
     ) { padding ->
@@ -94,6 +93,16 @@ fun NewOrderScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            item {
+                OutlinedTextField(
+                    value = viewModel.name,
+                    onValueChange = viewModel::onNameChange,
+                    label = { Text("Order name (optional)") },
+                    placeholder = { Text("e.g. Spring restock") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                )
+            }
             item { SectionTitle("Customer") }
             val selected = state.selectedCustomer
             if (selected != null) {
@@ -138,14 +147,14 @@ fun NewOrderScreen(
             }
 
             item { SectionTitle("Products", Modifier.padding(top = 8.dp)) }
-            if (state.products.isEmpty()) {
+            if (state.lines.isEmpty()) {
                 item { HintText("No products yet. Add some in the Products tab first.") }
             }
-            items(state.products, key = { "p-" + it.id }) { product ->
+            items(state.lines, key = { "p-" + it.productId }) { line ->
                 ProductQuantityRow(
-                    product = product,
-                    quantity = state.quantities[product.id] ?: 0,
-                    onQuantityChange = { viewModel.setQuantity(product.id, it) },
+                    line = line,
+                    quantity = state.quantities[line.productId] ?: 0,
+                    onQuantityChange = { viewModel.setQuantity(line.productId, it) },
                 )
                 HorizontalDivider()
             }
@@ -164,11 +173,26 @@ fun NewOrderScreen(
 }
 
 @Composable
-private fun ProductQuantityRow(product: Product, quantity: Int, onQuantityChange: (Int) -> Unit) {
+private fun ProductQuantityRow(line: ProductLine, quantity: Int, onQuantityChange: (Int) -> Unit) {
     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(product.name, style = MaterialTheme.typography.bodyLarge)
-            ProductPrice(product)
+            Text(line.name, style = MaterialTheme.typography.bodyLarge)
+            if (line.locked || line.product == null) {
+                // Already on the order: show the price it was ordered at, and today's price if different.
+                val current = line.product?.effectivePriceCents
+                val note = when {
+                    line.product == null || line.product.archived -> " · product removed"
+                    current != line.unitPriceCents -> " · now ${Money.format(current!!)}"
+                    else -> ""
+                }
+                Text(
+                    "${Money.format(line.unitPriceCents)} (order price)$note",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                ProductPrice(line.product)
+            }
         }
         TextButton(onClick = { onQuantityChange(quantity - 1) }, enabled = quantity > 0) {
             Text("−", style = MaterialTheme.typography.titleLarge)

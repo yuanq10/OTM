@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.otm.ordertracker.data.model.Customer
 import com.otm.ordertracker.data.model.Order
+import com.otm.ordertracker.data.model.OrderStatus
 import com.otm.ordertracker.data.repo.CustomerRepository
 import com.otm.ordertracker.data.repo.OrderRepository
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,8 +20,8 @@ data class CustomerDetailUiState(
 ) {
     private val activeOrders get() = orders.filterNot { it.isCanceled }
     val orderCount: Int get() = activeOrders.size
-    val unpaidCount: Int get() = activeOrders.count { !it.isPaid }
-    val notReceivedCount: Int get() = activeOrders.count { !it.isReceived }
+    val unpaidCount: Int get() = activeOrders.count { !it.has(OrderStatus.PAID_TO_ME) }
+    val notReceivedCount: Int get() = activeOrders.count { !it.has(OrderStatus.RECEIVED) }
     val totalSpentCents: Long get() = activeOrders.sumOf { it.totalCents }
 }
 

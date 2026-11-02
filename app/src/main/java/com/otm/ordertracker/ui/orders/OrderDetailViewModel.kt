@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.otm.ordertracker.data.model.Order
 import com.otm.ordertracker.data.model.OrderRules
+import com.otm.ordertracker.data.model.OrderStatus
 import com.otm.ordertracker.data.repo.OrderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,10 +34,10 @@ class OrderDetailViewModel(
     /** One-off error to show in a snackbar. */
     val message: StateFlow<String?> = _message.asStateFlow()
 
-    fun setPaid(paid: Boolean) = change { order, now -> OrderRules.setPaid(order, paid, now) }
-    fun setShipped(shipped: Boolean) = change { order, now -> OrderRules.setShipped(order, shipped, now) }
-    fun setReceived(received: Boolean) = change { order, now -> OrderRules.setReceived(order, received, now) }
+    fun setStatus(status: OrderStatus, on: Boolean) = change { order, now -> OrderRules.setStatus(order, status, on, now) }
     fun cancel() = change { order, now -> OrderRules.cancel(order, now) }
+    fun complete() = change { order, now -> OrderRules.complete(order, now) }
+    fun reopen() = change { order, _ -> OrderRules.reopen(order) }
 
     fun messageShown() {
         _message.value = null

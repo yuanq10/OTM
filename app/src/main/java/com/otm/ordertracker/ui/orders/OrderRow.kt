@@ -36,13 +36,20 @@ fun OrderRow(
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
+                    val itemsLabel = if (order.itemCount == 1) "1 item" else "${order.itemCount} items"
+                    // Title is the order name when set; otherwise the customer (or date in a customer's history).
+                    val fallbackTitle = if (showCustomer) order.customerName else formatDate(order.createdAt)
+                    val details = buildList {
+                        if (order.name.isNotBlank() && showCustomer) add(order.customerName)
+                        if (order.name.isNotBlank() || showCustomer) add(formatDate(order.createdAt))
+                        add(itemsLabel)
+                    }
                     Text(
-                        if (showCustomer) order.customerName else formatDate(order.createdAt),
+                        order.name.ifBlank { fallbackTitle },
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    val itemsLabel = if (order.itemCount == 1) "1 item" else "${order.itemCount} items"
                     Text(
-                        if (showCustomer) "${formatDate(order.createdAt)} · $itemsLabel" else itemsLabel,
+                        details.joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

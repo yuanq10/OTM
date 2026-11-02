@@ -11,6 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.otm.ordertracker.data.model.Order
+import com.otm.ordertracker.data.model.OrderStatus
 import com.otm.ordertracker.ui.AppViewModelProvider
 import com.otm.ordertracker.ui.common.ConfirmDialog
 import com.otm.ordertracker.ui.common.EmptyState
@@ -52,6 +55,7 @@ import com.otm.ordertracker.ui.common.formatDateTime
 fun OrderDetailScreen(
     onBack: () -> Unit,
     onOpenCustomer: (String) -> Unit,
+    onEdit: (String) -> Unit,
     viewModel: OrderDetailViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,10 +73,19 @@ fun OrderDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Order") },
+                title = { Text(state.order?.name?.ifBlank { null } ?: "Order") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    val order = state.order
+                    if (order != null && !order.isCanceled) {
+                        TextButton(onClick = { onEdit(order.id) }) {
+                            Icon(Icons.Filled.Edit, contentDescription = null)
+                            Text("Edit", Modifier.padding(start = 8.dp))
+                        }
                     }
                 },
             )
@@ -97,6 +110,9 @@ fun OrderDetailScreen(
                         "Canceled on ${order.canceledAt?.let(::formatDateTime) ?: "-"}. This order is kept for history and can't be changed.",
                         isError = true,
                     )
+                }
+                order.completedAt?.let { completedAt ->
+                    InfoBanner("Completed on ${formatDateTime(completedAt)}. It's in the Completed panel of the Orders page.")
                 }
 
                 // Customer and date
@@ -126,19 +142,23 @@ fun OrderDetailScreen(
                     }
                 }
 
-                StatusCard(
-                    order = order,
-                    onPaidChange = viewModel::setPaid,
-                    onShippedChange = viewModel::setShipped,
-                    onReceivedChange = viewModel::setReceived,
-                )
+                StatusCard(order = order, onStatusChange = viewModel::setStatus)
 
                 if (!order.isCanceled) {
-                    OutlinedButton(
-                        onClick = { confirmCancel = true },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Cancel order") }
+                    if (order.isCompleted) {
+                        OutlinedButton(onClick = viewModel::reopen, modifier = Modifier.fillMaxWidth()) {
+                            Text("Reopen order (move back to In progress)")
+                        }
+                    } else {
+                        Button(onClick = viewModel::complete, modifier = Modifier.fillMaxWidth()) {
+                            Text("Mark as completed")
+                        }
+                        OutlinedButton(
+                            onClick = { confirmCancel = true },
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text("Cancel order") }
+                    }
                 }
             }
         }
@@ -147,9 +167,10 @@ fun OrderDetailScreen(
     if (confirmCancel) {
         ConfirmDialog(
             title = "Cancel this order?",
-            message = "The order stays in the customer's history marked as canceled. This can't be undone.",
+            message = "It will be removed from the Orders page, but stays in the customer's order history marked as canceled. This can't be undone.",
             confirmLabel = "Cancel order",
-            onConfirm = viewModel::cancel,
+            // A canceled order disappears from the Orders page, so leave its detail page too.
+            onConfirm = { viewModel.cancel(); onBack() },
             onDismiss = { confirmCancel = false },
         )
     }
@@ -182,40 +203,20 @@ private fun ItemsCard(order: Order) {
     }
 }
 
+/** One switch per status. Statuses are independent, so every switch is always available (unless canceled). */
 @Composable
-private fun StatusCard(
-    order: Order,
-    onPaidChange: (Boolean) -> Unit,
-    onShippedChange: (Boolean) -> Unit,
-    onReceivedChange: (Boolean) -> Unit,
-) {
+private fun StatusCard(order: Order, onStatusChange: (OrderStatus, Boolean) -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Status", style = MaterialTheme.typography.titleSmall)
-            StatusRow(
-                label = "Paid",
-                checked = order.isPaid,
-                date = order.paidAt,
-                enabled = order.canTogglePaid,
-                hint = null,
-                onChange = onPaidChange,
-            )
-            StatusRow(
-                label = "Shipped",
-                checked = order.isShipped,
-                date = order.shippedAt,
-                enabled = order.canToggleShipped,
-                hint = if (!order.isCanceled && order.isReceived) "Turn off Received to change" else null,
-                onChange = onShippedChange,
-            )
-            StatusRow(
-                label = "Received",
-                checked = order.isReceived,
-                date = order.receivedAt,
-                enabled = order.canToggleReceived,
-                hint = if (!order.isCanceled && !order.isShipped) "Mark as shipped first" else null,
-                onChange = onReceivedChange,
-            )
+            OrderStatus.entries.forEach { status ->
+                StatusRow(
+                    label = status.label,
+                    date = order.dateOf(status),
+                    enabled = !order.isCanceled,
+                    onChange = { onStatusChange(status, it) },
+                )
+            }
         }
     }
 }
@@ -223,28 +224,22 @@ private fun StatusCard(
 @Composable
 private fun StatusRow(
     label: String,
-    checked: Boolean,
+    /** When the status was set; null when it isn't set. */
     date: Long?,
     enabled: Boolean,
-    hint: String?,
     onChange: (Boolean) -> Unit,
 ) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.bodyLarge)
-            val detail = when {
-                checked && date != null -> formatDateTime(date)
-                hint != null -> hint
-                else -> null
-            }
-            if (detail != null) {
+            if (date != null) {
                 Text(
-                    detail,
+                    formatDateTime(date),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = onChange, enabled = enabled)
+        Switch(checked = date != null, onCheckedChange = onChange, enabled = enabled)
     }
 }

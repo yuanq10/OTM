@@ -3,6 +3,8 @@ package com.otm.ordertracker
 import com.otm.ordertracker.data.model.Order
 import com.otm.ordertracker.data.model.OrderFilter
 import com.otm.ordertracker.data.model.OrderRules
+import com.otm.ordertracker.data.model.OrderStatus
+import com.otm.ordertracker.data.model.OrderTab
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -14,57 +16,77 @@ class OrderStatusTest {
     private val order = Order(id = "o1", createdAt = 1)
 
     @Test
-    fun paid_setsAndClearsDate() {
-        val paid = OrderRules.setPaid(order, true, now = 100)
-        assertTrue(paid.isPaid)
-        assertEquals(100L, paid.paidAt)
+    fun status_setsAndClearsDate() {
+        val paid = OrderRules.setStatus(order, OrderStatus.PAID_TO_ME, on = true, now = 100)
+        assertTrue(paid.has(OrderStatus.PAID_TO_ME))
+        assertEquals(100L, paid.dateOf(OrderStatus.PAID_TO_ME))
 
-        val repaid = OrderRules.setPaid(paid, true, now = 200)
-        assertEquals("keeps original date", 100L, repaid.paidAt)
+        val repaid = OrderRules.setStatus(paid, OrderStatus.PAID_TO_ME, on = true, now = 200)
+        assertEquals("keeps original date", 100L, repaid.dateOf(OrderStatus.PAID_TO_ME))
 
-        val unpaid = OrderRules.setPaid(paid, false, now = 300)
-        assertFalse(unpaid.isPaid)
-        assertNull(unpaid.paidAt)
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun received_requiresShipped() {
-        OrderRules.setReceived(order, true, now = 100)
+        val unpaid = OrderRules.setStatus(paid, OrderStatus.PAID_TO_ME, on = false, now = 300)
+        assertFalse(unpaid.has(OrderStatus.PAID_TO_ME))
+        assertNull(unpaid.dateOf(OrderStatus.PAID_TO_ME))
     }
 
     @Test
-    fun received_afterShipped() {
-        val shipped = OrderRules.setShipped(order, true, now = 100)
-        val received = OrderRules.setReceived(shipped, true, now = 200)
-        assertTrue(received.isReceived)
-        assertEquals(200L, received.receivedAt)
-        assertFalse(received.canToggleShipped)
-    }
+    fun statuses_areIndependentAndCanBeSetInAnyOrder() {
+        // Received before shipped, supplier paid before customer paid: all allowed.
+        val received = OrderRules.setStatus(order, OrderStatus.RECEIVED, true, 1)
+        val supplierPaid = OrderRules.setStatus(received, OrderStatus.PAID_TO_SUPPLIER, true, 2)
+        assertTrue(supplierPaid.has(OrderStatus.RECEIVED))
+        assertTrue(supplierPaid.has(OrderStatus.PAID_TO_SUPPLIER))
+        assertFalse(supplierPaid.has(OrderStatus.SHIPPED))
 
-    @Test(expected = IllegalStateException::class)
-    fun cannotUnshipWhileReceived() {
-        val received = OrderRules.setReceived(OrderRules.setShipped(order, true, 1), true, 2)
-        OrderRules.setShipped(received, false, now = 3)
+        val all = OrderStatus.entries.fold(order) { o, s -> OrderRules.setStatus(o, s, true, 5) }
+        assertTrue(OrderStatus.entries.all { all.has(it) })
+
+        // Turning one off leaves the others alone.
+        val shippedOff = OrderRules.setStatus(all, OrderStatus.SHIPPED, false, 6)
+        assertFalse(shippedOff.has(OrderStatus.SHIPPED))
+        assertTrue(shippedOff.has(OrderStatus.RECEIVED))
     }
 
     @Test(expected = IllegalStateException::class)
     fun canceledOrders_areReadOnly() {
         val canceled = OrderRules.cancel(order, now = 100)
         assertTrue(canceled.isCanceled)
-        OrderRules.setPaid(canceled, true, now = 200)
+        OrderRules.setStatus(canceled, OrderStatus.SHIPPED, true, now = 200)
     }
 
     @Test
-    fun filters_matchExpectedOrders() {
-        val unpaid = order
-        val shipped = OrderRules.setShipped(order, true, 1)
-        val received = OrderRules.setReceived(shipped, true, 2)
-        val canceled = OrderRules.cancel(order, 3)
+    fun filters_matchOrdersMissingThatStatus() {
+        val paid = OrderRules.setStatus(order, OrderStatus.PAID_TO_ME, true, 1)
+        val shipped = OrderRules.setStatus(order, OrderStatus.SHIPPED, true, 1)
+        val orders = listOf(order, paid, shipped)
 
-        assertEquals(listOf(unpaid), listOf(unpaid, shipped, received, canceled).filter { OrderFilter.TO_SHIP.matches(it) })
-        assertEquals(listOf(shipped), listOf(unpaid, shipped, received, canceled).filter { OrderFilter.SHIPPED.matches(it) })
-        assertEquals(listOf(received), listOf(unpaid, shipped, received, canceled).filter { OrderFilter.RECEIVED.matches(it) })
-        assertEquals(listOf(canceled), listOf(unpaid, shipped, received, canceled).filter { OrderFilter.CANCELED.matches(it) })
-        assertFalse(OrderFilter.UNPAID.matches(canceled))
+        assertEquals(listOf(order, shipped), orders.filter { OrderFilter.NOT_PAID_TO_ME.matches(it) })
+        assertEquals(listOf(order, paid), orders.filter { OrderFilter.NOT_SHIPPED.matches(it) })
+        assertEquals(orders, orders.filter { OrderFilter.ALL.matches(it) })
+    }
+
+    @Test
+    fun completeAndReopen_moveOrderBetweenTabs() {
+        val completed = OrderRules.complete(order, now = 500)
+        assertTrue(completed.isCompleted)
+        assertEquals(500L, completed.completedAt)
+        assertTrue(OrderTab.COMPLETED.matches(completed))
+        assertFalse(OrderTab.IN_PROGRESS.matches(completed))
+
+        val reopened = OrderRules.reopen(completed)
+        assertFalse(reopened.isCompleted)
+        assertTrue(OrderTab.IN_PROGRESS.matches(reopened))
+    }
+
+    @Test
+    fun canceledOrders_appearInNeitherTab() {
+        val canceled = OrderRules.cancel(order, 3)
+        assertFalse(OrderTab.IN_PROGRESS.matches(canceled))
+        assertFalse(OrderTab.COMPLETED.matches(canceled))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun canceledOrders_cantBeCompleted() {
+        OrderRules.complete(OrderRules.cancel(order, 3), now = 4)
     }
 }

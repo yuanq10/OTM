@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,8 +33,8 @@ import com.otm.ordertracker.ui.AppViewModelProvider
 import com.otm.ordertracker.ui.customers.CustomerDetailScreen
 import com.otm.ordertracker.ui.customers.CustomerEditScreen
 import com.otm.ordertracker.ui.customers.CustomerListScreen
-import com.otm.ordertracker.ui.orders.NewOrderScreen
-import com.otm.ordertracker.ui.orders.NewOrderViewModel
+import com.otm.ordertracker.ui.orders.OrderEditScreen
+import com.otm.ordertracker.ui.orders.OrderEditViewModel
 import com.otm.ordertracker.ui.orders.OrderDetailScreen
 import com.otm.ordertracker.ui.orders.OrderListScreen
 import com.otm.ordertracker.ui.products.ProductEditScreen
@@ -49,6 +51,9 @@ private object Routes {
 
     const val ORDER_DETAIL = "order/detail/{orderId}"
     fun orderDetail(orderId: String) = "order/detail/$orderId"
+
+    const val ORDER_EDIT = "order/edit/{orderId}"
+    fun orderEdit(orderId: String) = "order/edit/$orderId"
 
     const val CUSTOMER_EDIT = "customer/edit?customerId={customerId}"
     fun customerEdit(customerId: String? = null) =
@@ -124,30 +129,25 @@ fun OtmNavHost(onSignOut: () -> Unit) {
                 )
             }
             composable(Routes.NEW_ORDER, arguments = listOf(optionalStringArg("customerId"))) { entry ->
-                val viewModel: NewOrderViewModel = viewModel(factory = AppViewModelProvider.Factory)
-                val newCustomerId by entry.savedStateHandle
-                    .getStateFlow<String?>(NEW_CUSTOMER_ID, null)
-                    .collectAsStateWithLifecycle()
-                LaunchedEffect(newCustomerId) {
-                    newCustomerId?.let {
-                        viewModel.selectCustomer(it)
-                        entry.savedStateHandle[NEW_CUSTOMER_ID] = null
-                    }
-                }
-                NewOrderScreen(
-                    onBack = { nav.popBackStack() },
-                    onCreated = { orderId ->
+                OrderEditDestination(
+                    entry = entry,
+                    nav = nav,
+                    // Replace the form with the new order's detail page.
+                    onSaved = { orderId ->
                         nav.popBackStack()
                         nav.navigate(Routes.orderDetail(orderId))
                     },
-                    onNewCustomer = { nav.navigate(Routes.customerEdit()) },
-                    viewModel = viewModel,
                 )
+            }
+            composable(Routes.ORDER_EDIT) { entry ->
+                // Back to the order's detail page, which updates live.
+                OrderEditDestination(entry = entry, nav = nav, onSaved = { nav.popBackStack() })
             }
             composable(Routes.ORDER_DETAIL) {
                 OrderDetailScreen(
                     onBack = { nav.popBackStack() },
                     onOpenCustomer = { nav.navigate(Routes.customerDetail(it)) },
+                    onEdit = { nav.navigate(Routes.orderEdit(it)) },
                 )
             }
 
@@ -186,4 +186,25 @@ fun OtmNavHost(onSignOut: () -> Unit) {
             }
         }
     }
+}
+
+/** The order form, for both new and existing orders. Selects a customer created via "New customer" on return. */
+@Composable
+private fun OrderEditDestination(entry: NavBackStackEntry, nav: NavHostController, onSaved: (String) -> Unit) {
+    val viewModel: OrderEditViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val newCustomerId by entry.savedStateHandle
+        .getStateFlow<String?>(NEW_CUSTOMER_ID, null)
+        .collectAsStateWithLifecycle()
+    LaunchedEffect(newCustomerId) {
+        newCustomerId?.let {
+            viewModel.selectCustomer(it)
+            entry.savedStateHandle[NEW_CUSTOMER_ID] = null
+        }
+    }
+    OrderEditScreen(
+        onBack = { nav.popBackStack() },
+        onSaved = onSaved,
+        onNewCustomer = { nav.navigate(Routes.customerEdit()) },
+        viewModel = viewModel,
+    )
 }

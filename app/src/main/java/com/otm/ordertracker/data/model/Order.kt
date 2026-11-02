@@ -10,8 +10,21 @@ data class OrderItem(
     val lineTotalCents: Long get() = unitPriceCents * quantity
 }
 
+/**
+ * Independent order statuses: any combination can be set, in any order.
+ * [field] is the Firestore field holding the date the status was set (null/absent = not set).
+ */
+enum class OrderStatus(val label: String, val shortLabel: String, val field: String) {
+    PAID_TO_ME("Paid to me", "Paid to me", "paidAt"),
+    PAID_TO_SUPPLIER("Paid to supplier", "Paid supplier", "supplierPaidAt"),
+    SHIPPED("Shipped", "Shipped", "shippedAt"),
+    RECEIVED("Received", "Received", "receivedAt"),
+}
+
 data class Order(
     val id: String = "",
+    /** Optional name to help find the order later. */
+    val name: String = "",
     val customerId: String = "",
     /** Customer's name at the time the order was placed. */
     val customerName: String = "",
@@ -19,73 +32,92 @@ data class Order(
     val totalCents: Long = 0L,
     val createdAt: Long = 0L,
     val notes: String = "",
-    val isPaid: Boolean = false,
-    val paidAt: Long? = null,
-    val isShipped: Boolean = false,
-    val shippedAt: Long? = null,
-    val isReceived: Boolean = false,
-    val receivedAt: Long? = null,
+    /** Statuses that are set, with the date each was set. */
+    val statusDates: Map<OrderStatus, Long> = emptyMap(),
     val isCanceled: Boolean = false,
     val canceledAt: Long? = null,
+    /** When the order was marked completed; null while it's in progress. */
+    val completedAt: Long? = null,
 ) {
     val itemCount: Int get() = items.sumOf { it.quantity }
-    val canTogglePaid: Boolean get() = !isCanceled
-    /** Shipped can't be turned off while the order is marked received. */
-    val canToggleShipped: Boolean get() = !isCanceled && !isReceived
-    /** Received requires the order to be shipped first. */
-    val canToggleReceived: Boolean get() = !isCanceled && isShipped
+    val isCompleted: Boolean get() = completedAt != null
+
+    fun has(status: OrderStatus): Boolean = status in statusDates
+
+    fun dateOf(status: OrderStatus): Long? = statusDates[status]
 }
 
-enum class OrderFilter(val label: String) {
-    ALL("All"),
-    UNPAID("Unpaid"),
-    TO_SHIP("To ship"),
-    SHIPPED("Shipped"),
-    RECEIVED("Received"),
-    CANCELED("Canceled");
+/** The two panels of the Orders page. Canceled orders appear in neither. */
+enum class OrderTab(val label: String) {
+    IN_PROGRESS("In progress"),
+    COMPLETED("Completed");
 
-    fun matches(order: Order): Boolean = when (this) {
-        ALL -> true
-        UNPAID -> !order.isCanceled && !order.isPaid
-        TO_SHIP -> !order.isCanceled && !order.isShipped
-        SHIPPED -> !order.isCanceled && order.isShipped && !order.isReceived
-        RECEIVED -> !order.isCanceled && order.isReceived
-        CANCELED -> order.isCanceled
-    }
+    fun matches(order: Order): Boolean =
+        !order.isCanceled && order.isCompleted == (this == COMPLETED)
+}
+
+/** Status filters for in-progress orders: each shows the orders still missing that status. */
+enum class OrderFilter(val label: String, private val missing: OrderStatus?) {
+    ALL("All", null),
+    NOT_PAID_TO_ME("Not paid to me", OrderStatus.PAID_TO_ME),
+    SUPPLIER_NOT_PAID("Supplier not paid", OrderStatus.PAID_TO_SUPPLIER),
+    NOT_SHIPPED("Not shipped", OrderStatus.SHIPPED),
+    NOT_RECEIVED("Not received", OrderStatus.RECEIVED);
+
+    fun matches(order: Order): Boolean = missing == null || !order.has(missing)
 }
 
 /** Pure order logic, kept free of Android/Firebase so it can be unit tested. */
 object OrderRules {
 
-    /** Builds order lines from the chosen quantities, locking in each product's current effective price. */
-    fun buildItems(products: List<Product>, quantities: Map<String, Int>): List<OrderItem> =
-        products.mapNotNull { product ->
+    /**
+     * Builds order lines from the chosen quantities (product id -> quantity).
+     * Lines already on the order ([existing], when editing) keep the name and price they were ordered at;
+     * newly added products are locked in at their current effective price.
+     */
+    fun buildItems(
+        products: List<Product>,
+        quantities: Map<String, Int>,
+        existing: List<OrderItem> = emptyList(),
+    ): List<OrderItem> {
+        val existingIds = existing.map { it.productId }.toSet()
+        val kept = existing.mapNotNull { item ->
+            val qty = quantities[item.productId] ?: 0
+            if (qty <= 0) null else item.copy(quantity = qty)
+        }
+        val added = products.filter { it.id !in existingIds }.mapNotNull { product ->
             val qty = quantities[product.id] ?: 0
             if (qty <= 0) null
             else OrderItem(product.id, product.name, product.effectivePriceCents, qty)
         }
+        return kept + added
+    }
 
     fun total(items: List<OrderItem>): Long = items.sumOf { it.lineTotalCents }
 
-    fun setPaid(order: Order, paid: Boolean, now: Long): Order {
-        check(order.canTogglePaid) { "Canceled orders can't be changed" }
-        return order.copy(isPaid = paid, paidAt = if (paid) order.paidAt ?: now else null)
-    }
-
-    fun setShipped(order: Order, shipped: Boolean, now: Long): Order {
+    /** Turns a status on (keeping its original date if already on) or off. */
+    fun setStatus(order: Order, status: OrderStatus, on: Boolean, now: Long): Order {
         check(!order.isCanceled) { "Canceled orders can't be changed" }
-        check(shipped || !order.isReceived) { "Unmark received before unmarking shipped" }
-        return order.copy(isShipped = shipped, shippedAt = if (shipped) order.shippedAt ?: now else null)
-    }
-
-    fun setReceived(order: Order, received: Boolean, now: Long): Order {
-        check(!order.isCanceled) { "Canceled orders can't be changed" }
-        check(!received || order.isShipped) { "Mark the order as shipped first" }
-        return order.copy(isReceived = received, receivedAt = if (received) order.receivedAt ?: now else null)
+        val dates = if (on) order.statusDates + (status to (order.dateOf(status) ?: now))
+        else order.statusDates - status
+        return order.copy(statusDates = dates)
     }
 
     fun cancel(order: Order, now: Long): Order {
         check(!order.isCanceled) { "Order is already canceled" }
         return order.copy(isCanceled = true, canceledAt = now)
+    }
+
+    /** Moves the order to the Completed panel. Statuses are left as they are. */
+    fun complete(order: Order, now: Long): Order {
+        check(!order.isCanceled) { "Canceled orders can't be changed" }
+        check(!order.isCompleted) { "Order is already completed" }
+        return order.copy(completedAt = now)
+    }
+
+    /** Moves a completed order back to In progress. */
+    fun reopen(order: Order): Order {
+        check(order.isCompleted) { "Order isn't completed" }
+        return order.copy(completedAt = null)
     }
 }

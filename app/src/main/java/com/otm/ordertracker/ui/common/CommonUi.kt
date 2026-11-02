@@ -2,6 +2,8 @@ package com.otm.ordertracker.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.otm.ordertracker.data.model.Order
+import com.otm.ordertracker.data.model.OrderStatus
 import com.otm.ordertracker.data.model.Product
 
 @Composable
@@ -34,20 +37,28 @@ fun StatusBadge(text: String, container: Color, content: Color) {
     }
 }
 
-/** Compact Paid / Shipped / Received / Canceled badges for an order. */
+/** One badge per status: highlighted with a check mark when set, muted when not. Canceled orders show only "Canceled". */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OrderStatusBadges(order: Order, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         if (order.isCanceled) {
             StatusBadge("Canceled", colors.errorContainer, colors.onErrorContainer)
         } else {
-            if (order.isPaid) StatusBadge("Paid", colors.primaryContainer, colors.onPrimaryContainer)
-            else StatusBadge("Unpaid", colors.errorContainer, colors.onErrorContainer)
-            when {
-                order.isReceived -> StatusBadge("Received", colors.tertiaryContainer, colors.onTertiaryContainer)
-                order.isShipped -> StatusBadge("Shipped", colors.secondaryContainer, colors.onSecondaryContainer)
-                else -> StatusBadge("Not shipped", colors.surfaceVariant, colors.onSurfaceVariant)
+            if (order.isCompleted) {
+                StatusBadge("✓ Completed", colors.tertiaryContainer, colors.onTertiaryContainer)
+            }
+            OrderStatus.entries.forEach { status ->
+                if (order.has(status)) {
+                    StatusBadge("✓ ${status.shortLabel}", colors.primaryContainer, colors.onPrimaryContainer)
+                } else {
+                    StatusBadge(status.shortLabel, colors.surfaceVariant, colors.onSurfaceVariant.copy(alpha = 0.7f))
+                }
             }
         }
     }

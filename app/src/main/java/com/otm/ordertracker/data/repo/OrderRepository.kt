@@ -6,6 +6,7 @@ import com.otm.ordertracker.data.model.Customer
 import com.otm.ordertracker.data.model.Order
 import com.otm.ordertracker.data.model.OrderItem
 import com.otm.ordertracker.data.model.OrderRules
+import com.otm.ordertracker.data.model.OrderStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -31,58 +32,72 @@ class OrderRepository(
         collection().document(id).snapshotFlow().map { if (it.exists()) it.toOrder() else null }
 
     /** Returns the new order's id. */
-    fun create(customer: Customer, items: List<OrderItem>, notes: String): String {
+    fun create(customer: Customer, items: List<OrderItem>, name: String, notes: String): String {
         require(items.isNotEmpty()) { "An order needs at least one product" }
         val doc = collection().document()
         doc.set(
             mapOf(
+                "name" to name.trim(),
                 "customerId" to customer.id,
                 "customerName" to customer.fullName,
-                "items" to items.map {
-                    mapOf(
-                        "productId" to it.productId,
-                        "productName" to it.productName,
-                        "unitPriceCents" to it.unitPriceCents,
-                        "quantity" to it.quantity,
-                    )
-                },
+                "items" to items.map(::itemFields),
                 "totalCents" to OrderRules.total(items),
                 "createdAt" to System.currentTimeMillis(),
                 "notes" to notes.trim(),
-                "isPaid" to false,
-                "paidAt" to null,
-                "isShipped" to false,
-                "shippedAt" to null,
-                "isReceived" to false,
-                "receivedAt" to null,
                 "isCanceled" to false,
                 "canceledAt" to null,
-            )
+                "completedAt" to null,
+            ) + OrderStatus.entries.associate { it.field to null }
         ).logFailure("Create order")
         return doc.id
     }
 
-    /** Writes all status fields of [order] in one atomic update. */
+    /** Writes all status fields of [order] (statuses, canceled, completed) in one atomic update. */
     fun updateStatus(order: Order) {
         collection().document(order.id).update(
-            mapOf(
-                "isPaid" to order.isPaid,
-                "paidAt" to order.paidAt,
-                "isShipped" to order.isShipped,
-                "shippedAt" to order.shippedAt,
-                "isReceived" to order.isReceived,
-                "receivedAt" to order.receivedAt,
+            OrderStatus.entries.associate { it.field to order.dateOf(it) } + mapOf(
                 "isCanceled" to order.isCanceled,
                 "canceledAt" to order.canceledAt,
+                "completedAt" to order.completedAt,
             )
         ).logFailure("Update order status")
     }
+
+    /** Saves an edited order's details. Statuses, creation date and cancellation are left unchanged. */
+    fun updateDetails(
+        orderId: String,
+        customerId: String,
+        customerName: String,
+        items: List<OrderItem>,
+        name: String,
+        notes: String,
+    ) {
+        require(items.isNotEmpty()) { "An order needs at least one product" }
+        collection().document(orderId).update(
+            mapOf(
+                "name" to name.trim(),
+                "customerId" to customerId,
+                "customerName" to customerName,
+                "items" to items.map(::itemFields),
+                "totalCents" to OrderRules.total(items),
+                "notes" to notes.trim(),
+            )
+        ).logFailure("Update order")
+    }
+
+    private fun itemFields(item: OrderItem): Map<String, Any> = mapOf(
+        "productId" to item.productId,
+        "productName" to item.productName,
+        "unitPriceCents" to item.unitPriceCents,
+        "quantity" to item.quantity,
+    )
 
     private fun DocumentSnapshot.toOrder(): Order {
         @Suppress("UNCHECKED_CAST")
         val rawItems = get("items") as? List<Map<String, Any?>> ?: emptyList()
         return Order(
             id = id,
+            name = getString("name").orEmpty(),
             customerId = getString("customerId").orEmpty(),
             customerName = getString("customerName").orEmpty(),
             items = rawItems.map { item ->
@@ -96,14 +111,10 @@ class OrderRepository(
             totalCents = getLong("totalCents") ?: 0L,
             createdAt = getLong("createdAt") ?: 0L,
             notes = getString("notes").orEmpty(),
-            isPaid = getBoolean("isPaid") ?: false,
-            paidAt = getLong("paidAt"),
-            isShipped = getBoolean("isShipped") ?: false,
-            shippedAt = getLong("shippedAt"),
-            isReceived = getBoolean("isReceived") ?: false,
-            receivedAt = getLong("receivedAt"),
+            statusDates = OrderStatus.entries.mapNotNull { status -> getLong(status.field)?.let { status to it } }.toMap(),
             isCanceled = getBoolean("isCanceled") ?: false,
             canceledAt = getLong("canceledAt"),
+            completedAt = getLong("completedAt"),
         )
     }
 }

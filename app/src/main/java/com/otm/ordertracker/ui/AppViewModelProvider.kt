@@ -10,7 +10,7 @@ import com.otm.ordertracker.OtmApp
 import com.otm.ordertracker.ui.customers.CustomerDetailViewModel
 import com.otm.ordertracker.ui.customers.CustomerEditViewModel
 import com.otm.ordertracker.ui.customers.CustomerListViewModel
-import com.otm.ordertracker.ui.orders.NewOrderViewModel
+import com.otm.ordertracker.ui.orders.OrderEditViewModel
 import com.otm.ordertracker.ui.orders.OrderDetailViewModel
 import com.otm.ordertracker.ui.orders.OrderListViewModel
 import com.otm.ordertracker.ui.products.ProductEditViewModel
@@ -19,9 +19,15 @@ import com.otm.ordertracker.ui.products.ProductListViewModel
 /** Builds every ViewModel from the app's [AppContainer]. Navigation arguments arrive via SavedStateHandle. */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        initializer { OrderListViewModel(container().orderRepository) }
         initializer {
-            NewOrderViewModel(
+            OrderListViewModel(
+                container().orderRepository,
+                container().customerRepository,
+                container().productRepository,
+            )
+        }
+        initializer {
+            OrderEditViewModel(
                 createSavedStateHandle(),
                 container().customerRepository,
                 container().productRepository,

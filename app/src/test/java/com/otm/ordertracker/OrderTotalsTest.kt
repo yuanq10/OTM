@@ -28,6 +28,25 @@ class OrderTotalsTest {
     }
 
     @Test
+    fun editing_keepsOrderedPricesAndPricesNewProductsAtToday() {
+        val original = OrderRules.buildItems(listOf(tea, mug), mapOf("tea" to 1, "mug" to 1))
+        // Prices change after the order was placed.
+        val repricedTea = tea.copy(priceCents = 1200)
+        val repricedMug = mug.copy(salePriceCents = null)
+
+        val edited = OrderRules.buildItems(
+            products = listOf(repricedTea, repricedMug, pot),
+            quantities = mapOf("tea" to 3, "mug" to 0, "pot" to 1),
+            existing = original,
+        )
+
+        assertEquals(listOf("tea", "pot"), edited.map { it.productId })
+        assertEquals("kept the ordered price", 1000L, edited[0].unitPriceCents)
+        assertEquals(3, edited[0].quantity)
+        assertEquals("new line at today's price", 5000L, edited[1].unitPriceCents)
+    }
+
+    @Test
     fun lockedPrice_isUnaffectedByLaterPriceChanges() {
         val items = OrderRules.buildItems(listOf(tea), mapOf("tea" to 1))
         val repriced = tea.copy(priceCents = 9999)

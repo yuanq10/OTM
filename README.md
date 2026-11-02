@@ -4,8 +4,8 @@ A personal Android app for tracking orders, customers and products. Built with K
 
 ## Features
 - **Orders:** create an order for a customer with one or more products, and cancel orders.
-  - Track whether each order is **paid**, **shipped** and **received**, with the date of each.
-  - Filter orders by status.
+  - Track four independent statuses for each order (**Paid to me**, **Paid to supplier**, **Shipped**, **Received**), each with its date.
+  - Orders are split into **In progress** and **Completed** panels (mark an order completed from its page). In progress can be filtered by missing status; Completed can be filtered by the date range it was completed in. Canceled orders are hidden from the Orders page but kept in the customer's history.
   - Prices are locked in when the order is placed.
 - **Customers:** identified by first and last name. You can add, edit and remove them, and each customer has a full order history.
 - **Products:** add, edit and remove products. Prices are editable, and a product can be put on sale with a sale price.

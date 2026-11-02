@@ -13,7 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -54,9 +54,11 @@ fun CustomerListScreen(
         },
         floatingActionButton = {
             if (!state.showArchived) {
-                FloatingActionButton(onClick = onAddCustomer) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add customer")
-                }
+                ExtendedFloatingActionButton(
+                    onClick = onAddCustomer,
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text("New customer") },
+                )
             }
         },
     ) { padding ->
@@ -77,7 +79,7 @@ fun CustomerListScreen(
                     when {
                         state.query.isNotBlank() -> "No customers match \"${state.query}\"."
                         state.showArchived -> "No archived customers."
-                        else -> "No customers yet.\nTap + to add your first customer."
+                        else -> "No customers yet.\nTap \"New customer\" to add your first customer."
                     }
                 )
                 else -> LazyColumn {
