@@ -1,3 +1,4 @@
 <resources>
-    <style name="Theme.OrderTracker" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- AppCompat theme: needed by AppCompatActivity, which provides per-app language switching. -->
+    <style name="Theme.OrderTracker" parent="Theme.AppCompat.DayNight.NoActionBar" />
 </resources>

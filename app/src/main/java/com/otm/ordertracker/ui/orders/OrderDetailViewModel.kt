@@ -3,6 +3,7 @@ package com.otm.ordertracker.ui.orders
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.otm.ordertracker.R
 import com.otm.ordertracker.data.model.Order
 import com.otm.ordertracker.data.model.OrderRules
 import com.otm.ordertracker.data.model.OrderStatus
@@ -30,9 +31,9 @@ class OrderDetailViewModel(
             .map { OrderDetailUiState(loading = false, order = it) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OrderDetailUiState())
 
-    private val _message = MutableStateFlow<String?>(null)
-    /** One-off error to show in a snackbar. */
-    val message: StateFlow<String?> = _message.asStateFlow()
+    private val _message = MutableStateFlow<Int?>(null)
+    /** One-off error (a string resource id) to show in a snackbar. */
+    val message: StateFlow<Int?> = _message.asStateFlow()
 
     fun setStatus(status: OrderStatus, on: Boolean) = change { order, now -> OrderRules.setStatus(order, status, on, now) }
     fun cancel() = change { order, now -> OrderRules.cancel(order, now) }
@@ -48,7 +49,7 @@ class OrderDetailViewModel(
         try {
             repository.updateStatus(transform(order, System.currentTimeMillis()))
         } catch (e: IllegalStateException) {
-            _message.value = e.message
+            _message.value = R.string.order_cant_change
         }
     }
 }

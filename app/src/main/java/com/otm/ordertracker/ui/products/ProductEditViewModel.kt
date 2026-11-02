@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.products
 
+
+import com.otm.ordertracker.R
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,9 +18,9 @@ data class ProductForm(
     val price: String = "",
     val onSale: Boolean = false,
     val salePrice: String = "",
-    val nameError: String? = null,
-    val priceError: String? = null,
-    val salePriceError: String? = null,
+    @StringRes val nameError: Int? = null,
+    @StringRes val priceError: Int? = null,
+    @StringRes val salePriceError: Int? = null,
 )
 
 class ProductEditViewModel(
@@ -64,12 +67,12 @@ class ProductEditViewModel(
     fun save(): Boolean {
         val price = Money.parse(form.price)
         val salePrice = if (form.onSale) Money.parse(form.salePrice) else null
-        val nameError = if (form.name.isBlank()) "Enter a product name" else null
-        val priceError = if (price == null) "Enter a valid price, e.g. 12.50" else null
+        val nameError = if (form.name.isBlank()) R.string.error_product_name else null
+        val priceError = if (price == null) R.string.error_price else null
         val salePriceError = when {
             !form.onSale -> null
-            salePrice == null -> "Enter a valid sale price"
-            price != null && salePrice >= price -> "Sale price must be lower than the regular price"
+            salePrice == null -> R.string.error_sale_price
+            price != null && salePrice >= price -> R.string.error_sale_price_too_high
             else -> null
         }
         if (nameError != null || priceError != null || salePriceError != null || price == null) {

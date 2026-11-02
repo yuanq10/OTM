@@ -14,11 +14,11 @@ data class OrderItem(
  * Independent order statuses: any combination can be set, in any order.
  * [field] is the Firestore field holding the date the status was set (null/absent = not set).
  */
-enum class OrderStatus(val label: String, val shortLabel: String, val field: String) {
-    PAID_TO_ME("Paid to me", "Paid to me", "paidAt"),
-    PAID_TO_SUPPLIER("Paid to supplier", "Paid supplier", "supplierPaidAt"),
-    SHIPPED("Shipped", "Shipped", "shippedAt"),
-    RECEIVED("Received", "Received", "receivedAt"),
+enum class OrderStatus(val field: String) {
+    PAID_TO_ME("paidAt"),
+    PAID_TO_SUPPLIER("supplierPaidAt"),
+    SHIPPED("shippedAt"),
+    RECEIVED("receivedAt"),
 }
 
 data class Order(
@@ -48,21 +48,21 @@ data class Order(
 }
 
 /** The two panels of the Orders page. Canceled orders appear in neither. */
-enum class OrderTab(val label: String) {
-    IN_PROGRESS("In progress"),
-    COMPLETED("Completed");
+enum class OrderTab {
+    IN_PROGRESS,
+    COMPLETED;
 
     fun matches(order: Order): Boolean =
         !order.isCanceled && order.isCompleted == (this == COMPLETED)
 }
 
 /** Status filters for in-progress orders: each shows the orders still missing that status. */
-enum class OrderFilter(val label: String, private val missing: OrderStatus?) {
-    ALL("All", null),
-    NOT_PAID_TO_ME("Not paid to me", OrderStatus.PAID_TO_ME),
-    SUPPLIER_NOT_PAID("Supplier not paid", OrderStatus.PAID_TO_SUPPLIER),
-    NOT_SHIPPED("Not shipped", OrderStatus.SHIPPED),
-    NOT_RECEIVED("Not received", OrderStatus.RECEIVED);
+enum class OrderFilter(private val missing: OrderStatus?) {
+    ALL(null),
+    NOT_PAID_TO_ME(OrderStatus.PAID_TO_ME),
+    SUPPLIER_NOT_PAID(OrderStatus.PAID_TO_SUPPLIER),
+    NOT_SHIPPED(OrderStatus.SHIPPED),
+    NOT_RECEIVED(OrderStatus.RECEIVED);
 
     fun matches(order: Order): Boolean = missing == null || !order.has(missing)
 }

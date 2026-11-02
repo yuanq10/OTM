@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.customers
 
+
+import com.otm.ordertracker.R
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,8 +21,8 @@ data class CustomerForm(
     val lastName: String = "",
     val phone: String = "",
     val notes: String = "",
-    val firstNameError: String? = null,
-    val lastNameError: String? = null,
+    @StringRes val firstNameError: Int? = null,
+    @StringRes val lastNameError: Int? = null,
 )
 
 class CustomerEditViewModel(
@@ -64,8 +67,8 @@ class CustomerEditViewModel(
 
     /** Validates and saves. Returns the customer's id when saved, null when the form is invalid. */
     fun save(): String? {
-        val firstNameError = if (form.firstName.isBlank()) "Enter a first name" else null
-        val lastNameError = if (form.lastName.isBlank()) "Enter a last name" else null
+        val firstNameError = if (form.firstName.isBlank()) R.string.error_first_name else null
+        val lastNameError = if (form.lastName.isBlank()) R.string.error_last_name else null
         if (firstNameError != null || lastNameError != null) {
             form = form.copy(firstNameError = firstNameError, lastNameError = lastNameError)
             return null

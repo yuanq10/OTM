@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.common
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -48,16 +51,16 @@ fun OrderStatusBadges(order: Order, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         if (order.isCanceled) {
-            StatusBadge("Canceled", colors.errorContainer, colors.onErrorContainer)
+            StatusBadge(stringResource(R.string.badge_canceled), colors.errorContainer, colors.onErrorContainer)
         } else {
             if (order.isCompleted) {
-                StatusBadge("✓ Completed", colors.tertiaryContainer, colors.onTertiaryContainer)
+                StatusBadge(stringResource(R.string.badge_done, stringResource(R.string.badge_completed)), colors.tertiaryContainer, colors.onTertiaryContainer)
             }
             OrderStatus.entries.forEach { status ->
                 if (order.has(status)) {
-                    StatusBadge("✓ ${status.shortLabel}", colors.primaryContainer, colors.onPrimaryContainer)
+                    StatusBadge(stringResource(R.string.badge_done, stringResource(status.shortLabelRes)), colors.primaryContainer, colors.onPrimaryContainer)
                 } else {
-                    StatusBadge(status.shortLabel, colors.surfaceVariant, colors.onSurfaceVariant.copy(alpha = 0.7f))
+                    StatusBadge(stringResource(status.shortLabelRes), colors.surfaceVariant, colors.onSurfaceVariant.copy(alpha = 0.7f))
                 }
             }
         }
@@ -84,7 +87,7 @@ fun ProductPrice(product: Product, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            StatusBadge("Sale", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+            StatusBadge(stringResource(R.string.badge_sale), MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
         }
     }
 }
@@ -109,7 +112,7 @@ fun ConfirmDialog(
     confirmLabel: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    dismissLabel: String = "Keep",
+    dismissLabel: String = stringResource(R.string.keep),
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

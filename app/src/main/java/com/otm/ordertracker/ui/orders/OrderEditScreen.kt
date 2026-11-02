@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.orders
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,10 +61,10 @@ fun OrderEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (viewModel.isNew) "New order" else "Edit order") },
+                title = { Text(stringResource(if (viewModel.isNew) R.string.new_order else R.string.edit_order)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
             )
@@ -69,7 +72,7 @@ fun OrderEditScreen(
         bottomBar = {
             BottomAppBar {
                 Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
-                    Text("Total", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.total), style = MaterialTheme.typography.labelMedium)
                     Text(
                         Money.format(state.totalCents),
                         style = MaterialTheme.typography.titleLarge,
@@ -80,7 +83,7 @@ fun OrderEditScreen(
                     onClick = { viewModel.save()?.let(onSaved) },
                     enabled = state.canSave,
                     modifier = Modifier.padding(end = 16.dp),
-                ) { Text(if (viewModel.isNew) "Create order" else "Save changes") }
+                ) { Text(stringResource(if (viewModel.isNew) R.string.create_order else R.string.save_changes)) }
             }
         },
     ) { padding ->
@@ -97,20 +100,20 @@ fun OrderEditScreen(
                 OutlinedTextField(
                     value = viewModel.name,
                     onValueChange = viewModel::onNameChange,
-                    label = { Text("Order name (optional)") },
-                    placeholder = { Text("e.g. Spring restock") },
+                    label = { Text(stringResource(R.string.order_name_optional)) },
+                    placeholder = { Text(stringResource(R.string.order_name_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                 )
             }
-            item { SectionTitle("Customer") }
+            item { SectionTitle(stringResource(R.string.customer)) }
             val selected = state.selectedCustomer
             if (selected != null) {
                 item {
                     OutlinedCard(Modifier.fillMaxWidth()) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(selected.fullName, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                            TextButton(onClick = { viewModel.selectCustomer(null) }) { Text("Change") }
+                            TextButton(onClick = { viewModel.selectCustomer(null) }) { Text(stringResource(R.string.change)) }
                         }
                     }
                 }
@@ -119,7 +122,7 @@ fun OrderEditScreen(
                     OutlinedTextField(
                         value = state.customerQuery,
                         onValueChange = viewModel::onCustomerQueryChange,
-                        placeholder = { Text("Search customers") },
+                        placeholder = { Text(stringResource(R.string.search_customers)) },
                         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -136,19 +139,19 @@ fun OrderEditScreen(
                     HorizontalDivider()
                 }
                 if (state.hasCustomers && state.customerMatches.isEmpty()) {
-                    item { HintText("No customers match \"${state.customerQuery}\".") }
+                    item { HintText(stringResource(R.string.no_customers_match, state.customerQuery)) }
                 }
                 item {
                     TextButton(onClick = onNewCustomer) {
                         Icon(Icons.Filled.Add, contentDescription = null)
-                        Text("New customer", Modifier.padding(start = 8.dp))
+                        Text(stringResource(R.string.new_customer), Modifier.padding(start = 8.dp))
                     }
                 }
             }
 
-            item { SectionTitle("Products", Modifier.padding(top = 8.dp)) }
+            item { SectionTitle(stringResource(R.string.products), Modifier.padding(top = 8.dp)) }
             if (state.lines.isEmpty()) {
-                item { HintText("No products yet. Add some in the Products tab first.") }
+                item { HintText(stringResource(R.string.no_products_for_order)) }
             }
             items(state.lines, key = { "p-" + it.productId }) { line ->
                 ProductQuantityRow(
@@ -163,7 +166,7 @@ fun OrderEditScreen(
                 OutlinedTextField(
                     value = viewModel.notes,
                     onValueChange = viewModel::onNotesChange,
-                    label = { Text("Notes (optional)") },
+                    label = { Text(stringResource(R.string.notes_optional)) },
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
@@ -181,12 +184,12 @@ private fun ProductQuantityRow(line: ProductLine, quantity: Int, onQuantityChang
                 // Already on the order: show the price it was ordered at, and today's price if different.
                 val current = line.product?.effectivePriceCents
                 val note = when {
-                    line.product == null || line.product.archived -> " · product removed"
-                    current != line.unitPriceCents -> " · now ${Money.format(current!!)}"
+                    line.product == null || line.product.archived -> " · " + stringResource(R.string.product_removed)
+                    current != line.unitPriceCents -> " · " + stringResource(R.string.price_now, Money.format(current!!))
                     else -> ""
                 }
                 Text(
-                    "${Money.format(line.unitPriceCents)} (order price)$note",
+                    stringResource(R.string.order_price, Money.format(line.unitPriceCents)) + note,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

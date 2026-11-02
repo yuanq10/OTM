@@ -1,7 +1,7 @@
 package com.otm.ordertracker
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
@@ -15,7 +15,8 @@ import com.otm.ordertracker.ui.navigation.OtmNavHost
 import com.otm.ordertracker.ui.theme.OrderTrackerTheme
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+/** AppCompatActivity (rather than ComponentActivity) so the in-app language setting can be applied. */
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,7 +35,7 @@ class MainActivity : ComponentActivity() {
                 } else {
                     // Keyed by user so all screens and their data reset when the account changes.
                     key(signedInUser.uid) {
-                        OtmNavHost(onSignOut = { scope.launch { authRepository.signOut(context) } })
+                        OtmNavHost(accountEmail = signedInUser.email, onSignOut = { scope.launch { authRepository.signOut(context) } })
                     }
                 }
             }

@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.products
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,19 +54,19 @@ fun ProductEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (viewModel.isNew) "New product" else "Edit product") },
+                title = { Text(stringResource(if (viewModel.isNew) R.string.new_product else R.string.edit_product)) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     if (!viewModel.isNew) {
                         if (viewModel.archived) {
-                            TextButton(onClick = { viewModel.markArchived(false) }) { Text("Restore") }
+                            TextButton(onClick = { viewModel.markArchived(false) }) { Text(stringResource(R.string.restore)) }
                         } else {
                             IconButton(onClick = { confirmRemove = true }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Remove product")
+                                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.remove_product))
                             }
                         }
                     }
@@ -83,60 +86,60 @@ fun ProductEditScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (viewModel.archived) {
-                InfoBanner("This product is removed. It still shows on past orders but can't be added to new ones.")
+                InfoBanner(stringResource(R.string.product_removed_banner))
             }
             OutlinedTextField(
                 value = form.name,
                 onValueChange = viewModel::onNameChange,
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.name)) },
                 isError = form.nameError != null,
-                supportingText = if (form.nameError != null) { { Text(form.nameError) } } else null,
+                supportingText = if (form.nameError != null) { { Text(stringResource(form.nameError)) } } else null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = form.price,
                 onValueChange = viewModel::onPriceChange,
-                label = { Text("Regular price") },
+                label = { Text(stringResource(R.string.regular_price)) },
                 isError = form.priceError != null,
-                supportingText = if (form.priceError != null) { { Text(form.priceError) } } else null,
+                supportingText = if (form.priceError != null) { { Text(stringResource(form.priceError)) } } else null,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("On sale", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.on_sale), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Switch(checked = form.onSale, onCheckedChange = viewModel::onSaleChange)
             }
             if (form.onSale) {
                 OutlinedTextField(
                     value = form.salePrice,
                     onValueChange = viewModel::onSalePriceChange,
-                    label = { Text("Sale price") },
+                    label = { Text(stringResource(R.string.sale_price)) },
                     isError = form.salePriceError != null,
-                    supportingText = if (form.salePriceError != null) { { Text(form.salePriceError) } } else null,
+                    supportingText = if (form.salePriceError != null) { { Text(stringResource(form.salePriceError)) } } else null,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
             Text(
-                "Price changes only apply to new orders. Existing orders keep the price they were placed at.",
+                stringResource(R.string.price_change_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Button(
                 onClick = { if (viewModel.save()) onDone() },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Save") }
+            ) { Text(stringResource(R.string.save)) }
         }
     }
 
     if (confirmRemove) {
         ConfirmDialog(
-            title = "Remove product?",
-            message = "It will no longer be available for new orders. Past orders are not affected. You can restore it from \"Show archived\".",
-            confirmLabel = "Remove",
+            title = stringResource(R.string.remove_product_title),
+            message = stringResource(R.string.remove_product_message),
+            confirmLabel = stringResource(R.string.remove),
             onConfirm = { viewModel.markArchived(true); onDone() },
             onDismiss = { confirmRemove = false },
         )

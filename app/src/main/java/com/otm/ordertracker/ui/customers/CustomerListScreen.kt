@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.customers
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,10 +47,10 @@ fun CustomerListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.showArchived) "Archived customers" else "Customers") },
+                title = { Text(stringResource(if (state.showArchived) R.string.archived_customers else R.string.customers)) },
                 actions = {
                     TextButton(onClick = { viewModel.setShowArchived(!state.showArchived) }) {
-                        Text(if (state.showArchived) "Show active" else "Show archived")
+                        Text(stringResource(if (state.showArchived) R.string.show_active else R.string.show_archived))
                     }
                 },
             )
@@ -57,7 +60,7 @@ fun CustomerListScreen(
                 ExtendedFloatingActionButton(
                     onClick = onAddCustomer,
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text("New customer") },
+                    text = { Text(stringResource(R.string.new_customer)) },
                 )
             }
         },
@@ -66,7 +69,7 @@ fun CustomerListScreen(
             OutlinedTextField(
                 value = state.query,
                 onValueChange = viewModel::onQueryChange,
-                placeholder = { Text("Search by name or phone") },
+                placeholder = { Text(stringResource(R.string.search_customers_hint)) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -77,9 +80,9 @@ fun CustomerListScreen(
                 }
                 state.customers.isEmpty() -> EmptyState(
                     when {
-                        state.query.isNotBlank() -> "No customers match \"${state.query}\"."
-                        state.showArchived -> "No archived customers."
-                        else -> "No customers yet.\nTap \"New customer\" to add your first customer."
+                        state.query.isNotBlank() -> stringResource(R.string.no_customers_match, state.query)
+                        state.showArchived -> stringResource(R.string.no_archived_customers)
+                        else -> stringResource(R.string.no_customers_yet)
                     }
                 )
                 else -> LazyColumn {
@@ -90,7 +93,7 @@ fun CustomerListScreen(
                                 { Text(customer.phone) }
                             } else null,
                             trailingContent = if (customer.archived) {
-                                { TextButton(onClick = { viewModel.restore(customer.id) }) { Text("Restore") } }
+                                { TextButton(onClick = { viewModel.restore(customer.id) }) { Text(stringResource(R.string.restore)) } }
                             } else null,
                             modifier = Modifier.clickable { onOpenCustomer(customer.id) },
                         )

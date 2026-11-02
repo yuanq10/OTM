@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.customers
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,22 +63,22 @@ fun CustomerDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(customer?.fullName ?: "Customer") },
+                title = { Text(customer?.fullName ?: stringResource(R.string.customer)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     if (customer != null) {
                         IconButton(onClick = { onEdit(customer.id) }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Edit customer")
+                            Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit_customer))
                         }
                         if (customer.archived) {
-                            TextButton(onClick = { viewModel.setArchived(false) }) { Text("Restore") }
+                            TextButton(onClick = { viewModel.setArchived(false) }) { Text(stringResource(R.string.restore)) }
                         } else {
                             IconButton(onClick = { confirmRemove = true }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Remove customer")
+                                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.remove_customer))
                             }
                         }
                     }
@@ -87,7 +90,7 @@ fun CustomerDetailScreen(
             state.loading -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            customer == null -> EmptyState("This customer no longer exists.", Modifier.padding(padding))
+            customer == null -> EmptyState(stringResource(R.string.customer_missing), Modifier.padding(padding))
             else -> LazyColumn(
                 contentPadding = PaddingValues(
                     start = 16.dp,
@@ -99,13 +102,13 @@ fun CustomerDetailScreen(
             ) {
                 if (customer.archived) {
                     item {
-                        InfoBanner("This customer is removed. Their order history is kept, but they can't be picked for new orders.")
+                        InfoBanner(stringResource(R.string.customer_removed_banner))
                     }
                 }
                 if (customer.phone.isNotBlank() || customer.notes.isNotBlank()) {
                     item {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            if (customer.phone.isNotBlank()) Text("Phone: ${customer.phone}")
+                            if (customer.phone.isNotBlank()) Text(stringResource(R.string.phone_value, customer.phone))
                             if (customer.notes.isNotBlank()) {
                                 Text(customer.notes, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
@@ -114,26 +117,26 @@ fun CustomerDetailScreen(
                 }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Stat("Orders", state.orderCount.toString(), Modifier.weight(1f))
-                        Stat("Unpaid", state.unpaidCount.toString(), Modifier.weight(1f))
-                        Stat("Not received", state.notReceivedCount.toString(), Modifier.weight(1f))
-                        Stat("Total", Money.format(state.totalSpentCents), Modifier.weight(1f))
+                        Stat(stringResource(R.string.stat_orders), state.orderCount.toString(), Modifier.weight(1f))
+                        Stat(stringResource(R.string.stat_unpaid), state.unpaidCount.toString(), Modifier.weight(1f))
+                        Stat(stringResource(R.string.filter_not_received), state.notReceivedCount.toString(), Modifier.weight(1f))
+                        Stat(stringResource(R.string.total), Money.format(state.totalSpentCents), Modifier.weight(1f))
                     }
                 }
                 if (!customer.archived) {
                     item {
                         Button(onClick = { onNewOrder(customer.id) }, modifier = Modifier.fillMaxWidth()) {
                             Icon(Icons.Filled.Add, contentDescription = null)
-                            Text("New order for ${customer.firstName}", Modifier.padding(start = 8.dp))
+                            Text(stringResource(R.string.new_order_for, customer.firstName), Modifier.padding(start = 8.dp))
                         }
                     }
                 }
                 item {
-                    Text("Order history", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.order_history), style = MaterialTheme.typography.titleMedium)
                 }
                 if (state.orders.isEmpty()) {
                     item {
-                        Text("No orders yet.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.no_orders_yet), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
                 items(state.orders, key = { it.id }) { order ->
@@ -145,9 +148,9 @@ fun CustomerDetailScreen(
 
     if (confirmRemove && customer != null) {
         ConfirmDialog(
-            title = "Remove ${customer.fullName}?",
-            message = "They won't be available for new orders. Their order history is kept. You can restore them from \"Show archived\".",
-            confirmLabel = "Remove",
+            title = stringResource(R.string.remove_customer_title, customer.fullName),
+            message = stringResource(R.string.remove_customer_message),
+            confirmLabel = stringResource(R.string.remove),
             onConfirm = { viewModel.setArchived(true) },
             onDismiss = { confirmRemove = false },
         )

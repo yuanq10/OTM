@@ -1,5 +1,6 @@
 package com.otm.ordertracker
 
+import com.otm.ordertracker.data.settings.AppCurrency
 import com.otm.ordertracker.ui.common.Money
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -8,11 +9,48 @@ import java.util.Locale
 
 class MoneyTest {
 
+    private companion object {
+        // Non-breaking spaces that French number formats use; written as code points so they stay visible here.
+        val NBSP = 0x00A0.toChar()
+        val NARROW_NBSP = 0x202F.toChar()
+    }
+
+    private fun String.normalizeSpaces() = replace(NBSP, ' ').replace(NARROW_NBSP, ' ')
+
     @Test
-    fun format_usesCurrencyOfLocale() {
-        assertEquals("$12.34", Money.format(1234, Locale.US))
-        assertEquals("$0.05", Money.format(5, Locale.US))
-        assertEquals("$1,000.00", Money.format(100_000, Locale.US))
+    fun format_usesNumberStyleOfLocale() {
+        assertEquals("$12.34", Money.format(1234, Locale.US, AppCurrency.USD))
+        assertEquals("$0.05", Money.format(5, Locale.US, AppCurrency.USD))
+        assertEquals("$1,000.00", Money.format(100_000, Locale.US, AppCurrency.USD))
+    }
+
+    @Test
+    fun format_showsOnlyTheSymbol_inAnyLanguage() {
+        // Never "US$", "CA$", "$US" or "CN¥": just the symbol, in the language's number style.
+        assertEquals("$12.34", Money.format(1234, Locale.US, AppCurrency.CAD))
+        assertEquals("¥12.34", Money.format(1234, Locale.US, AppCurrency.CNY))
+        assertEquals("12,34 $", Money.format(1234, Locale.FRENCH, AppCurrency.USD).normalizeSpaces())
+        assertEquals("12,34 $", Money.format(1234, Locale.CANADA_FRENCH, AppCurrency.CAD).normalizeSpaces())
+        assertEquals("¥12.34", Money.format(1234, Locale.SIMPLIFIED_CHINESE, AppCurrency.CNY))
+        assertEquals("$12.34", Money.format(1234, Locale.SIMPLIFIED_CHINESE, AppCurrency.USD))
+    }
+
+    @Test
+    fun currencyForRegion_picksSupportedCurrencies() {
+        assertEquals(AppCurrency.USD, AppCurrency.forRegion(Locale.US))
+        assertEquals(AppCurrency.CAD, AppCurrency.forRegion(Locale.CANADA_FRENCH))
+        assertEquals(AppCurrency.CNY, AppCurrency.forRegion(Locale.SIMPLIFIED_CHINESE))
+        assertNull("unsupported currency", AppCurrency.forRegion(Locale.GERMANY))
+        assertNull("no region", AppCurrency.forRegion(Locale.FRENCH))
+    }
+
+    @Test
+    fun parse_acceptsDecimalComma() {
+        assertEquals(1250L, Money.parse("12,50"))
+        assertEquals(1250L, Money.parse("12,5"))
+        assertEquals(123450L, Money.parse("1.234,50"))
+        assertEquals(123450L, Money.parse("1 234,50 €"))
+        assertEquals("comma before 3 digits is a thousands separator", 123400L, Money.parse("1,234"))
     }
 
     @Test

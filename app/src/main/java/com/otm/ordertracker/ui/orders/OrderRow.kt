@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.orders
 
+
+import androidx.compose.ui.res.pluralStringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +39,7 @@ fun OrderRow(
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    val itemsLabel = if (order.itemCount == 1) "1 item" else "${order.itemCount} items"
+                    val itemsLabel = pluralStringResource(R.plurals.item_count, order.itemCount, order.itemCount)
                     // Title is the order name when set; otherwise the customer (or date in a customer's history).
                     val fallbackTitle = if (showCustomer) order.customerName else formatDate(order.createdAt)
                     val details = buildList {

@@ -1,5 +1,9 @@
 package com.otm.ordertracker.ui.orders
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
+import com.otm.ordertracker.ui.common.labelRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,29 +73,19 @@ import java.time.format.FormatStyle
 fun OrderListScreen(
     onNewOrder: () -> Unit,
     onOpenOrder: (String) -> Unit,
-    onSignOut: () -> Unit,
     viewModel: OrderListViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var confirmSignOut by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Orders") },
-                actions = {
-                    TextButton(onClick = { confirmSignOut = true }) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
-                        Text("Logout", Modifier.padding(start = 8.dp))
-                    }
-                },
-            )
+            TopAppBar(title = { Text(stringResource(R.string.orders_title)) })
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNewOrder,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("New order") },
+                text = { Text(stringResource(R.string.new_order)) },
             )
         },
     ) { padding ->
@@ -101,7 +95,7 @@ fun OrderListScreen(
                     Tab(
                         selected = state.tab == tab,
                         onClick = { viewModel.setTab(tab) },
-                        text = { Text("${tab.label} (${state.tabCounts[tab] ?: 0})") },
+                        text = { Text(stringResource(R.string.label_with_count, stringResource(tab.labelRes), state.tabCounts[tab] ?: 0)) },
                     )
                 }
             }
@@ -128,7 +122,7 @@ fun OrderListScreen(
                         FilterChip(
                             selected = state.filter == filter,
                             onClick = { viewModel.setFilter(filter) },
-                            label = { Text("${filter.label} ($count)") },
+                            label = { Text(stringResource(R.string.label_with_count, stringResource(filter.labelRes), count)) },
                         )
                     }
                 }
@@ -144,11 +138,10 @@ fun OrderListScreen(
                 state.orders.isEmpty() -> EmptyState(
                     when {
                         state.isSearching || state.dateRange != null && state.tab == OrderTab.COMPLETED ->
-                            "No orders match your search."
-                        state.tab == OrderTab.COMPLETED ->
-                            "No completed orders yet.\nOpen an order and tap \"Mark as completed\" to move it here."
-                        state.filter == OrderFilter.ALL -> "No orders in progress.\nTap \"New order\" to create one."
-                        else -> "No orders in \"${state.filter.label}\"."
+                            stringResource(R.string.orders_empty_search)
+                        state.tab == OrderTab.COMPLETED -> stringResource(R.string.orders_empty_completed)
+                        state.filter == OrderFilter.ALL -> stringResource(R.string.orders_empty_in_progress)
+                        else -> stringResource(R.string.orders_empty_filter, stringResource(state.filter.labelRes))
                     }
                 )
                 else -> LazyColumn(
@@ -162,17 +155,6 @@ fun OrderListScreen(
                 }
             }
         }
-    }
-
-    if (confirmSignOut) {
-        ConfirmDialog(
-            title = "Log out?",
-            message = "Your data stays saved in your account. Log in again to see it.",
-            confirmLabel = "Logout",
-            onConfirm = onSignOut,
-            onDismiss = { confirmSignOut = false },
-            dismissLabel = "Stay logged in",
-        )
     }
 }
 
@@ -191,20 +173,25 @@ private fun SearchBar(
                 selected = true,
                 onClick = onClear,
                 label = {
-                    val kind = if (selection is SearchSelection.ByCustomer) "Customer" else "Product"
-                    Text("$kind: ${selection.label}")
+                    val format = if (selection is SearchSelection.ByCustomer) R.string.search_selected_customer
+                    else R.string.search_selected_product
+                    Text(stringResource(format, selection.label))
                 },
-                trailingIcon = { Icon(Icons.Filled.Close, contentDescription = "Clear search") },
+                trailingIcon = { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.clear_search)) },
             )
         }
     } else {
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text("Search by order name, customer or product") },
+            placeholder = { Text(stringResource(R.string.orders_search_hint)) },
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             trailingIcon = if (query.isNotEmpty()) {
-                { IconButton(onClick = onClear) { Icon(Icons.Filled.Close, contentDescription = "Clear search") } }
+                {
+                    IconButton(onClick = onClear) {
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.clear_search))
+                    }
+                }
             } else null,
             singleLine = true,
             modifier = modifier,
@@ -220,18 +207,23 @@ private fun Suggestions(
     onSelect: (SearchSelection) -> Unit,
 ) {
     OutlinedCard(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp)) {
+        val removed = stringResource(R.string.removed_suffix)
         customers.forEach { customer ->
             ListItem(
-                overlineContent = { Text("Customer") },
-                headlineContent = { Text("All orders for ${customer.fullName}" + if (customer.archived) " (removed)" else "") },
+                overlineContent = { Text(stringResource(R.string.customer)) },
+                headlineContent = {
+                    Text(stringResource(R.string.search_all_orders_for, customer.fullName) + if (customer.archived) removed else "")
+                },
                 leadingContent = { Icon(Icons.Filled.Person, contentDescription = null) },
                 modifier = Modifier.clickable { onSelect(SearchSelection.ByCustomer(customer.id, customer.fullName)) },
             )
         }
         products.forEach { product ->
             ListItem(
-                overlineContent = { Text("Product") },
-                headlineContent = { Text("All orders with ${product.name}" + if (product.archived) " (removed)" else "") },
+                overlineContent = { Text(stringResource(R.string.product)) },
+                headlineContent = {
+                    Text(stringResource(R.string.search_all_orders_with, product.name) + if (product.archived) removed else "")
+                },
                 leadingContent = { Icon(Icons.Filled.ShoppingCart, contentDescription = null) },
                 modifier = Modifier.clickable { onSelect(SearchSelection.ByProduct(product.id, product.name)) },
             )
@@ -257,12 +249,18 @@ private fun DateRangeFilter(range: DateRange?, onRangeChange: (DateRange?) -> Un
             leadingIcon = { Icon(Icons.Filled.DateRangeIcon, contentDescription = null) },
             label = {
                 Text(
-                    if (range == null) "Completed: any date"
-                    else "Completed: ${range.start.format(format)} – ${range.end.format(format)}"
+                    if (range == null) stringResource(R.string.completed_any_date)
+                    else stringResource(R.string.completed_range, range.start.format(format), range.end.format(format))
                 )
             },
             trailingIcon = if (range != null) {
-                { Icon(Icons.Filled.Close, contentDescription = "Clear date range", Modifier.clickable { onRangeChange(null) }) }
+                {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.clear_date_range),
+                        modifier = Modifier.clickable { onRangeChange(null) },
+                    )
+                }
             } else null,
         )
     }
@@ -286,13 +284,13 @@ private fun DateRangeFilter(range: DateRange?, onRangeChange: (DateRange?) -> Un
                         }
                         picking = false
                     },
-                ) { Text("Apply") }
+                ) { Text(stringResource(R.string.apply)) }
             },
-            dismissButton = { TextButton(onClick = { picking = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { picking = false }) { Text(stringResource(R.string.cancel)) } },
         ) {
             DateRangePicker(
                 state = state,
-                title = { Text("Completed between", Modifier.padding(start = 24.dp, top = 16.dp)) },
+                title = { Text(stringResource(R.string.completed_between), Modifier.padding(start = 24.dp, top = 16.dp)) },
                 modifier = Modifier.weight(1f),
             )
         }

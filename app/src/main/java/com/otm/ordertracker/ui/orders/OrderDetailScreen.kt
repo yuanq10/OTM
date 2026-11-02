@@ -1,5 +1,9 @@
 package com.otm.ordertracker.ui.orders
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
+import com.otm.ordertracker.ui.common.labelRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,8 +67,9 @@ fun OrderDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var confirmCancel by remember { mutableStateOf(false) }
 
-    LaunchedEffect(message) {
-        message?.let {
+    val messageText = message?.let { stringResource(it) }
+    LaunchedEffect(messageText) {
+        messageText?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.messageShown()
         }
@@ -73,10 +78,10 @@ fun OrderDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.order?.name?.ifBlank { null } ?: "Order") },
+                title = { Text(state.order?.name?.ifBlank { null } ?: stringResource(R.string.order_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -84,7 +89,7 @@ fun OrderDetailScreen(
                     if (order != null && !order.isCanceled) {
                         TextButton(onClick = { onEdit(order.id) }) {
                             Icon(Icons.Filled.Edit, contentDescription = null)
-                            Text("Edit", Modifier.padding(start = 8.dp))
+                            Text(stringResource(R.string.edit), Modifier.padding(start = 8.dp))
                         }
                     }
                 },
@@ -97,7 +102,7 @@ fun OrderDetailScreen(
             state.loading -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            order == null -> EmptyState("This order no longer exists.", Modifier.padding(padding))
+            order == null -> EmptyState(stringResource(R.string.order_missing), Modifier.padding(padding))
             else -> Column(
                 modifier = Modifier
                     .padding(padding)
@@ -107,12 +112,12 @@ fun OrderDetailScreen(
             ) {
                 if (order.isCanceled) {
                     InfoBanner(
-                        "Canceled on ${order.canceledAt?.let(::formatDateTime) ?: "-"}. This order is kept for history and can't be changed.",
+                        stringResource(R.string.order_canceled_banner, order.canceledAt?.let(::formatDateTime) ?: "-"),
                         isError = true,
                     )
                 }
                 order.completedAt?.let { completedAt ->
-                    InfoBanner("Completed on ${formatDateTime(completedAt)}. It's in the Completed panel of the Orders page.")
+                    InfoBanner(stringResource(R.string.order_completed_banner, formatDateTime(completedAt)))
                 }
 
                 // Customer and date
@@ -124,7 +129,7 @@ fun OrderDetailScreen(
                         Text(order.customerName, style = MaterialTheme.typography.titleLarge)
                     }
                     Text(
-                        "Placed ${formatDateTime(order.createdAt)}",
+                        stringResource(R.string.order_placed, formatDateTime(order.createdAt)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 12.dp),
@@ -136,7 +141,7 @@ fun OrderDetailScreen(
                 if (order.notes.isNotBlank()) {
                     Card(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(16.dp)) {
-                            Text("Notes", style = MaterialTheme.typography.titleSmall)
+                            Text(stringResource(R.string.notes), style = MaterialTheme.typography.titleSmall)
                             Text(order.notes)
                         }
                     }
@@ -147,17 +152,17 @@ fun OrderDetailScreen(
                 if (!order.isCanceled) {
                     if (order.isCompleted) {
                         OutlinedButton(onClick = viewModel::reopen, modifier = Modifier.fillMaxWidth()) {
-                            Text("Reopen order (move back to In progress)")
+                            Text(stringResource(R.string.reopen_order))
                         }
                     } else {
                         Button(onClick = viewModel::complete, modifier = Modifier.fillMaxWidth()) {
-                            Text("Mark as completed")
+                            Text(stringResource(R.string.mark_completed))
                         }
                         OutlinedButton(
                             onClick = { confirmCancel = true },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Cancel order") }
+                        ) { Text(stringResource(R.string.cancel_order)) }
                     }
                 }
             }
@@ -166,9 +171,9 @@ fun OrderDetailScreen(
 
     if (confirmCancel) {
         ConfirmDialog(
-            title = "Cancel this order?",
-            message = "It will be removed from the Orders page, but stays in the customer's order history marked as canceled. This can't be undone.",
-            confirmLabel = "Cancel order",
+            title = stringResource(R.string.cancel_order_title),
+            message = stringResource(R.string.cancel_order_message),
+            confirmLabel = stringResource(R.string.cancel_order),
             // A canceled order disappears from the Orders page, so leave its detail page too.
             onConfirm = { viewModel.cancel(); onBack() },
             onDismiss = { confirmCancel = false },
@@ -180,13 +185,13 @@ fun OrderDetailScreen(
 private fun ItemsCard(order: Order) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Items", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.items), style = MaterialTheme.typography.titleSmall)
             order.items.forEach { item ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("${item.quantity} × ${item.productName}")
+                        Text(stringResource(R.string.item_line, item.quantity, item.productName))
                         Text(
-                            "${Money.format(item.unitPriceCents)} each",
+                            stringResource(R.string.price_each, Money.format(item.unitPriceCents)),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -196,7 +201,7 @@ private fun ItemsCard(order: Order) {
             }
             HorizontalDivider()
             Row {
-                Text("Total", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.total), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Text(Money.format(order.totalCents), fontWeight = FontWeight.Bold)
             }
         }
@@ -208,10 +213,10 @@ private fun ItemsCard(order: Order) {
 private fun StatusCard(order: Order, onStatusChange: (OrderStatus, Boolean) -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Status", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.status), style = MaterialTheme.typography.titleSmall)
             OrderStatus.entries.forEach { status ->
                 StatusRow(
-                    label = status.label,
+                    label = stringResource(status.labelRes),
                     date = order.dateOf(status),
                     enabled = !order.isCanceled,
                     onChange = { onStatusChange(status, it) },

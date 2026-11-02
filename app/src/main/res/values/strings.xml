@@ -1,3 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English (default). French and Simplified Chinese translations are in values-fr/ and values-zh-rCN/. -->
 <resources>
     <string name="app_name">Order Tracker</string>
+
+    <!-- Common -->
+    <string name="apply">Apply</string>
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="change">Change</string>
+    <string name="edit">Edit</string>
+    <string name="keep">Keep</string>
+    <string name="remove">Remove</string>
+    <string name="restore">Restore</string>
+    <string name="save">Save</string>
+    <string name="save_anyway">Save anyway</string>
+    <string name="save_changes">Save changes</string>
+    <string name="clear_search">Clear search</string>
+    <string name="show_active">Show active</string>
+    <string name="show_archived">Show archived</string>
+    <string name="notes">Notes</string>
+    <string name="notes_optional">Notes (optional)</string>
+    <string name="total">Total</string>
+    <string name="status">Status</string>
+    <string name="items">Items</string>
+    <string name="name">Name</string>
+    <!-- A label followed by a count, e.g. "Not shipped (3)" -->
+    <string name="label_with_count">%1$s (%2$d)</string>
+    <!-- Appended to the name of a removed customer/product; keep the leading space -->
+    <string name="removed_suffix">" (removed)"</string>
+    <plurals name="item_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+
+    <!-- Bottom bar / titles -->
+    <string name="orders_title">Orders</string>
+    <string name="customers">Customers</string>
+    <string name="products">Products</string>
+    <string name="settings">Settings</string>
+    <string name="customer">Customer</string>
+    <string name="product">Product</string>
+
+    <!-- Order statuses and filters -->
+    <string name="status_paid_to_me">Paid to me</string>
+    <string name="status_paid_to_supplier">Paid to supplier</string>
+    <string name="status_paid_to_supplier_short">Paid supplier</string>
+    <string name="status_shipped">Shipped</string>
+    <string name="status_received">Received</string>
+    <string name="filter_all">All</string>
+    <string name="filter_not_paid_to_me">Not paid to me</string>
+    <string name="filter_supplier_not_paid">Supplier not paid</string>
+    <string name="filter_not_shipped">Not shipped</string>
+    <string name="filter_not_received">Not received</string>
+    <string name="tab_in_progress">In progress</string>
+    <string name="tab_completed">Completed</string>
+    <!-- Badge on a set status, e.g. "✓ Shipped" -->
+    <string name="badge_done">✓ %1$s</string>
+    <string name="badge_completed">Completed</string>
+    <string name="badge_canceled">Canceled</string>
+    <string name="badge_sale">Sale</string>
+
+    <!-- Orders page -->
+    <string name="new_order">New order</string>
+    <string name="orders_search_hint">Search by order name, customer or product</string>
+    <string name="search_selected_customer">Customer: %1$s</string>
+    <string name="search_selected_product">Product: %1$s</string>
+    <string name="search_all_orders_for">All orders for %1$s</string>
+    <string name="search_all_orders_with">All orders with %1$s</string>
+    <string name="completed_any_date">Completed: any date</string>
+    <!-- Date range, e.g. "Completed: Oct 1, 2026 – Oct 31, 2026" -->
+    <string name="completed_range">Completed: %1$s – %2$s</string>
+    <string name="completed_between">Completed between</string>
+    <string name="clear_date_range">Clear date range</string>
+    <string name="orders_empty_search">No orders match your search.</string>
+    <string name="orders_empty_completed">No completed orders yet.\nOpen an order and tap \"Mark as completed\" to move it here.</string>
+    <string name="orders_empty_in_progress">No orders in progress.\nTap \"New order\" to create one.</string>
+    <string name="orders_empty_filter">No orders in \"%1$s\".</string>
+
+    <!-- Order page -->
+    <string name="order_title">Order</string>
+    <string name="order_missing">This order no longer exists.</string>
+    <string name="order_canceled_banner">Canceled on %1$s. This order is kept for history and can\\x27t be changed.</string>
+    <string name="order_completed_banner">Completed on %1$s. It\\x27s in the Completed panel of the Orders page.</string>
+    <string name="order_placed">Placed %1$s</string>
+    <!-- Quantity and product, e.g. "2 × blueberry" -->
+    <string name="item_line">%1$d × %2$s</string>
+    <string name="price_each">%1$s each</string>
+    <string name="mark_completed">Mark as completed</string>
+    <string name="reopen_order">Reopen order (move back to In progress)</string>
+    <string name="cancel_order">Cancel order</string>
+    <string name="cancel_order_title">Cancel this order?</string>
+    <string name="cancel_order_message">It will be removed from the Orders page, but stays in the customer\\x27s order history marked as canceled. This can\\x27t be undone.</string>
+    <string name="order_cant_change">This order can\\x27t be changed.</string>
+
+    <!-- New / edit order -->
+    <string name="edit_order">Edit order</string>
+    <string name="create_order">Create order</string>
+    <string name="order_name_optional">Order name (optional)</string>
+    <string name="order_name_hint">e.g. Spring restock</string>
+    <string name="search_customers">Search customers</string>
+    <string name="no_customers_match">No customers match \"%1$s\".</string>
+    <string name="new_customer">New customer</string>
+    <string name="no_products_for_order">No products yet. Add some in the Products tab first.</string>
+    <string name="order_price">%1$s (order price)</string>
+    <string name="price_now">now %1$s</string>
+    <string name="product_removed">product removed</string>
+
+    <!-- Customers -->
+    <string name="archived_customers">Archived customers</string>
+    <string name="search_customers_hint">Search by name or phone</string>
+    <string name="no_archived_customers">No archived customers.</string>
+    <string name="no_customers_yet">No customers yet.\nTap \"New customer\" to add your first customer.</string>
+    <string name="edit_customer">Edit customer</string>
+    <string name="remove_customer">Remove customer</string>
+    <string name="customer_missing">This customer no longer exists.</string>
+    <string name="customer_removed_banner">This customer is removed. Their order history is kept, but they can\\x27t be picked for new orders.</string>
+    <string name="phone_value">Phone: %1$s</string>
+    <string name="stat_orders">Orders</string>
+    <string name="stat_unpaid">Unpaid</string>
+    <string name="new_order_for">New order for %1$s</string>
+    <string name="order_history">Order history</string>
+    <string name="no_orders_yet">No orders yet.</string>
+    <string name="remove_customer_title">Remove %1$s?</string>
+    <string name="remove_customer_message">They won\\x27t be available for new orders. Their order history is kept. You can restore them from \"Show archived\".</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="phone_optional">Phone (optional)</string>
+    <string name="duplicate_customer_warning">A customer named %1$s already exists. You can still save, but they\\x27ll be hard to tell apart.</string>
+    <string name="error_first_name">Enter a first name</string>
+    <string name="error_last_name">Enter a last name</string>
+
+    <!-- Products -->
+    <string name="archived_products">Archived products</string>
+    <string name="new_product">New product</string>
+    <string name="edit_product">Edit product</string>
+    <string name="search_products">Search products</string>
+    <string name="on_sale">On sale</string>
+    <string name="not_on_sale">Not on sale</string>
+    <string name="no_products_match">No products match \"%1$s\".</string>
+    <string name="no_products_in_filter">No products in \"%1$s\".</string>
+    <string name="no_archived_products">No archived products.</string>
+    <string name="no_products_yet">No products yet.\nTap \"New product\" to add your first product.</string>
+    <string name="remove_product">Remove product</string>
+    <string name="product_removed_banner">This product is removed. It still shows on past orders but can\\x27t be added to new ones.</string>
+    <string name="regular_price">Regular price</string>
+    <string name="sale_price">Sale price</string>
+    <string name="price_change_note">Price changes only apply to new orders. Existing orders keep the price they were placed at.</string>
+    <string name="remove_product_title">Remove product?</string>
+    <string name="remove_product_message">It will no longer be available for new orders. Past orders are not affected. You can restore it from \"Show archived\".</string>
+    <string name="error_product_name">Enter a product name</string>
+    <string name="error_price">Enter a valid price, e.g. 12.50</string>
+    <string name="error_sale_price">Enter a valid sale price</string>
+    <string name="error_sale_price_too_high">Sale price must be lower than the regular price</string>
+
+    <!-- Sign in -->
+    <string name="sign_in_message">Sign in with your Google account so your orders, customers and products are backed up and synced.</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_failed">Sign-in failed</string>
+
+    <!-- Settings -->
+    <string name="language">Language</string>
+    <string name="language_system_default">Same as phone</string>
+    <string name="currency">Currency</string>
+    <!-- Currency name with its symbol and code, e.g. "US dollar ($ · USD)" -->
+    <string name="currency_usd">US dollar (%1$s · %2$s)</string>
+    <string name="currency_cad">Canadian dollar (%1$s · %2$s)</string>
+    <string name="currency_cny">Chinese yuan (%1$s · %2$s)</string>
+    <string name="currency_note">Only the symbol changes. Amounts aren\'t converted between currencies.</string>
+    <string name="account">Account</string>
+    <string name="signed_in_as">Signed in as %1$s</string>
+    <string name="logout">Logout</string>
+    <string name="logout_title">Log out?</string>
+    <string name="logout_message">Your data stays saved in your account. Log in again to see it.</string>
+    <string name="stay_logged_in">Stay logged in</string>
 </resources>

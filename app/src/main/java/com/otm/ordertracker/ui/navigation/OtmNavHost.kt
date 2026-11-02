@@ -1,5 +1,6 @@
 package com.otm.ordertracker.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -18,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.otm.ordertracker.R
 import com.otm.ordertracker.ui.AppViewModelProvider
 import com.otm.ordertracker.ui.customers.CustomerDetailScreen
 import com.otm.ordertracker.ui.customers.CustomerEditScreen
@@ -39,11 +43,13 @@ import com.otm.ordertracker.ui.orders.OrderDetailScreen
 import com.otm.ordertracker.ui.orders.OrderListScreen
 import com.otm.ordertracker.ui.products.ProductEditScreen
 import com.otm.ordertracker.ui.products.ProductListScreen
+import com.otm.ordertracker.ui.settings.SettingsScreen
 
 private object Routes {
     const val ORDERS = "orders"
     const val CUSTOMERS = "customers"
     const val PRODUCTS = "products"
+    const val SETTINGS = "settings"
 
     const val NEW_ORDER = "order/new?customerId={customerId}"
     fun newOrder(customerId: String? = null) =
@@ -70,12 +76,13 @@ private object Routes {
 /** Set on the previous screen's SavedStateHandle when a customer is created, so New Order can select them. */
 private const val NEW_CUSTOMER_ID = "newCustomerId"
 
-private data class TopLevelDestination(val route: String, val label: String, val icon: ImageVector)
+private data class TopLevelDestination(val route: String, @StringRes val labelRes: Int, val icon: ImageVector)
 
 private val topLevelDestinations = listOf(
-    TopLevelDestination(Routes.ORDERS, "Orders", Icons.AutoMirrored.Filled.List),
-    TopLevelDestination(Routes.CUSTOMERS, "Customers", Icons.Filled.Person),
-    TopLevelDestination(Routes.PRODUCTS, "Products", Icons.Filled.ShoppingCart),
+    TopLevelDestination(Routes.ORDERS, R.string.orders_title, Icons.AutoMirrored.Filled.List),
+    TopLevelDestination(Routes.CUSTOMERS, R.string.customers, Icons.Filled.Person),
+    TopLevelDestination(Routes.PRODUCTS, R.string.products, Icons.Filled.ShoppingCart),
+    TopLevelDestination(Routes.SETTINGS, R.string.settings, Icons.Filled.Settings),
 )
 
 private fun optionalStringArg(name: String) = navArgument(name) {
@@ -86,7 +93,7 @@ private fun optionalStringArg(name: String) = navArgument(name) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun OtmNavHost(onSignOut: () -> Unit) {
+fun OtmNavHost(accountEmail: String?, onSignOut: () -> Unit) {
     val nav = rememberNavController()
     val backStackEntry by nav.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -109,7 +116,7 @@ fun OtmNavHost(onSignOut: () -> Unit) {
                                 }
                             },
                             icon = { Icon(destination.icon, contentDescription = null) },
-                            label = { Text(destination.label) },
+                            label = { Text(stringResource(destination.labelRes)) },
                         )
                     }
                 }
@@ -125,8 +132,10 @@ fun OtmNavHost(onSignOut: () -> Unit) {
                 OrderListScreen(
                     onNewOrder = { nav.navigate(Routes.newOrder()) },
                     onOpenOrder = { nav.navigate(Routes.orderDetail(it)) },
-                    onSignOut = onSignOut,
                 )
+            }
+            composable(Routes.SETTINGS) {
+                SettingsScreen(accountEmail = accountEmail, onLogout = onSignOut)
             }
             composable(Routes.NEW_ORDER, arguments = listOf(optionalStringArg("customerId"))) { entry ->
                 OrderEditDestination(

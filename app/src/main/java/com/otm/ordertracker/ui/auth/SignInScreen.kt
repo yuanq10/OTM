@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.auth
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,9 +41,9 @@ fun SignInScreen(authRepository: AuthRepository) {
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("Order Tracker", style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
             Text(
-                "Sign in with your Google account so your orders, customers and products are backed up and synced.",
+                stringResource(R.string.sign_in_message),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -58,12 +61,12 @@ fun SignInScreen(authRepository: AuthRepository) {
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
-                            error = e.message ?: "Sign-in failed"
+                            error = e.message ?: context.getString(R.string.sign_in_failed)
                         } finally {
                             busy = false
                         }
                     }
-                }) { Text("Sign in with Google") }
+                }) { Text(stringResource(R.string.sign_in_with_google)) }
             }
             error?.let {
                 Text(it, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)

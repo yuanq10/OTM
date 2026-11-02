@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.products
 
+
+import com.otm.ordertracker.R
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.otm.ordertracker.data.model.Product
@@ -10,10 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-enum class ProductFilter(val label: String) {
-    ALL("All"),
-    ON_SALE("On sale"),
-    NOT_ON_SALE("Not on sale");
+enum class ProductFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.filter_all),
+    ON_SALE(R.string.on_sale),
+    NOT_ON_SALE(R.string.not_on_sale);
 
     fun matches(product: Product): Boolean = when (this) {
         ALL -> true

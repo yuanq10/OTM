@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.customers
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,10 +51,10 @@ fun CustomerEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (viewModel.isNew) "New customer" else "Edit customer") },
+                title = { Text(stringResource(if (viewModel.isNew) R.string.new_customer else R.string.edit_customer)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
             )
@@ -71,9 +74,9 @@ fun CustomerEditScreen(
             OutlinedTextField(
                 value = form.firstName,
                 onValueChange = viewModel::onFirstNameChange,
-                label = { Text("First name") },
+                label = { Text(stringResource(R.string.first_name)) },
                 isError = form.firstNameError != null,
-                supportingText = if (form.firstNameError != null) { { Text(form.firstNameError) } } else null,
+                supportingText = if (form.firstNameError != null) { { Text(stringResource(form.firstNameError)) } } else null,
                 singleLine = true,
                 keyboardOptions = nameOptions,
                 modifier = Modifier.fillMaxWidth(),
@@ -81,20 +84,20 @@ fun CustomerEditScreen(
             OutlinedTextField(
                 value = form.lastName,
                 onValueChange = viewModel::onLastNameChange,
-                label = { Text("Last name") },
+                label = { Text(stringResource(R.string.last_name)) },
                 isError = form.lastNameError != null,
-                supportingText = if (form.lastNameError != null) { { Text(form.lastNameError) } } else null,
+                supportingText = if (form.lastNameError != null) { { Text(stringResource(form.lastNameError)) } } else null,
                 singleLine = true,
                 keyboardOptions = nameOptions,
                 modifier = Modifier.fillMaxWidth(),
             )
             if (duplicate != null) {
-                InfoBanner("A customer named ${duplicate.fullName} already exists. You can still save, but they'll be hard to tell apart.")
+                InfoBanner(stringResource(R.string.duplicate_customer_warning, duplicate.fullName))
             }
             OutlinedTextField(
                 value = form.phone,
                 onValueChange = viewModel::onPhoneChange,
-                label = { Text("Phone (optional)") },
+                label = { Text(stringResource(R.string.phone_optional)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.fillMaxWidth(),
@@ -102,14 +105,14 @@ fun CustomerEditScreen(
             OutlinedTextField(
                 value = form.notes,
                 onValueChange = viewModel::onNotesChange,
-                label = { Text("Notes (optional)") },
+                label = { Text(stringResource(R.string.notes_optional)) },
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
             Button(
                 onClick = { viewModel.save()?.let(onSaved) },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(if (duplicate != null) "Save anyway" else "Save") }
+            ) { Text(stringResource(if (duplicate != null) R.string.save_anyway else R.string.save)) }
         }
     }
 }

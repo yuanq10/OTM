@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simplified Chinese. Keep in sync with values/strings.xml. -->
+<resources>
+    <string name="app_name">订单追踪</string>
+
+    <!-- Common -->
+    <string name="apply">应用</string>
+    <string name="back">返回</string>
+    <string name="cancel">取消</string>
+    <string name="change">更改</string>
+    <string name="edit">编辑</string>
+    <string name="keep">保留</string>
+    <string name="remove">移除</string>
+    <string name="restore">恢复</string>
+    <string name="save">保存</string>
+    <string name="save_anyway">仍然保存</string>
+    <string name="save_changes">保存更改</string>
+    <string name="clear_search">清除搜索</string>
+    <string name="show_active">显示在用</string>
+    <string name="show_archived">显示已归档</string>
+    <string name="notes">备注</string>
+    <string name="notes_optional">备注（可选）</string>
+    <string name="total">合计</string>
+    <string name="status">状态</string>
+    <string name="items">商品</string>
+    <string name="name">名称</string>
+    <string name="label_with_count">%1$s（%2$d）</string>
+    <string name="removed_suffix">（已移除）</string>
+    <plurals name="item_count">
+        <item quantity="other">%d 件商品</item>
+    </plurals>
+
+    <!-- Bottom bar / titles -->
+    <string name="orders_title">订单</string>
+    <string name="customers">客户</string>
+    <string name="products">产品</string>
+    <string name="settings">设置</string>
+    <string name="customer">客户</string>
+    <string name="product">产品</string>
+
+    <!-- Order statuses and filters -->
+    <string name="status_paid_to_me">客户已付款</string>
+    <string name="status_paid_to_supplier">已付供应商</string>
+    <string name="status_paid_to_supplier_short">已付供应商</string>
+    <string name="status_shipped">已发货</string>
+    <string name="status_received">已收货</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_not_paid_to_me">客户未付款</string>
+    <string name="filter_supplier_not_paid">未付供应商</string>
+    <string name="filter_not_shipped">未发货</string>
+    <string name="filter_not_received">未收货</string>
+    <string name="tab_in_progress">进行中</string>
+    <string name="tab_completed">已完成</string>
+    <string name="badge_done">✓ %1$s</string>
+    <string name="badge_completed">已完成</string>
+    <string name="badge_canceled">已取消</string>
+    <string name="badge_sale">促销</string>
+
+    <!-- Orders page -->
+    <string name="new_order">新建订单</string>
+    <string name="orders_search_hint">按订单名称、客户或产品搜索</string>
+    <string name="search_selected_customer">客户：%1$s</string>
+    <string name="search_selected_product">产品：%1$s</string>
+    <string name="search_all_orders_for">%1$s 的所有订单</string>
+    <string name="search_all_orders_with">含 %1$s 的所有订单</string>
+    <string name="completed_any_date">完成日期：不限</string>
+    <string name="completed_range">完成日期：%1$s – %2$s</string>
+    <string name="completed_between">完成日期范围</string>
+    <string name="clear_date_range">清除日期范围</string>
+    <string name="orders_empty_search">没有符合搜索条件的订单。</string>
+    <string name="orders_empty_completed">还没有已完成的订单。\n打开订单并点击“标记为已完成”即可移到这里。</string>
+    <string name="orders_empty_in_progress">没有进行中的订单。\n点击“新建订单”创建一个。</string>
+    <string name="orders_empty_filter">“%1$s”中没有订单。</string>
+
+    <!-- Order page -->
+    <string name="order_title">订单</string>
+    <string name="order_missing">该订单已不存在。</string>
+    <string name="order_canceled_banner">已于 %1$s 取消。此订单仅作历史记录保留，无法修改。</string>
+    <string name="order_completed_banner">已于 %1$s 完成。可在订单页面的“已完成”栏中找到。</string>
+    <string name="order_placed">下单时间：%1$s</string>
+    <string name="item_line">%1$d × %2$s</string>
+    <string name="price_each">单价 %1$s</string>
+    <string name="mark_completed">标记为已完成</string>
+    <string name="reopen_order">重新打开订单（移回进行中）</string>
+    <string name="cancel_order">取消订单</string>
+    <string name="cancel_order_title">取消此订单？</string>
+    <string name="cancel_order_message">该订单将从订单页面移除，但仍会以“已取消”状态保留在客户的订单历史中。此操作无法撤销。</string>
+    <string name="order_cant_change">此订单无法修改。</string>
+
+    <!-- New / edit order -->
+    <string name="edit_order">编辑订单</string>
+    <string name="create_order">创建订单</string>
+    <string name="order_name_optional">订单名称（可选）</string>
+    <string name="order_name_hint">例如：春季补货</string>
+    <string name="search_customers">搜索客户</string>
+    <string name="no_customers_match">没有与“%1$s”匹配的客户。</string>
+    <string name="new_customer">新建客户</string>
+    <string name="no_products_for_order">还没有产品。请先在“产品”页面添加。</string>
+    <string name="order_price">%1$s（下单价）</string>
+    <string name="price_now">现价 %1$s</string>
+    <string name="product_removed">产品已移除</string>
+
+    <!-- Customers -->
+    <string name="archived_customers">已归档客户</string>
+    <string name="search_customers_hint">按姓名或电话搜索</string>
+    <string name="no_archived_customers">没有已归档的客户。</string>
+    <string name="no_customers_yet">还没有客户。\n点击“新建客户”添加第一位客户。</string>
+    <string name="edit_customer">编辑客户</string>
+    <string name="remove_customer">移除客户</string>
+    <string name="customer_missing">该客户已不存在。</string>
+    <string name="customer_removed_banner">该客户已移除。其订单历史会保留，但不能再为其创建新订单。</string>
+    <string name="phone_value">电话：%1$s</string>
+    <string name="stat_orders">订单</string>
+    <string name="stat_unpaid">未付款</string>
+    <string name="new_order_for">为 %1$s 新建订单</string>
+    <string name="order_history">订单历史</string>
+    <string name="no_orders_yet">还没有订单。</string>
+    <string name="remove_customer_title">移除 %1$s？</string>
+    <string name="remove_customer_message">该客户将无法用于新订单，其订单历史会保留。你可以在“显示已归档”中恢复。</string>
+    <string name="first_name">名</string>
+    <string name="last_name">姓</string>
+    <string name="phone_optional">电话（可选）</string>
+    <string name="duplicate_customer_warning">已存在名为 %1$s 的客户。你仍可保存，但两者将难以区分。</string>
+    <string name="error_first_name">请输入名</string>
+    <string name="error_last_name">请输入姓</string>
+
+    <!-- Products -->
+    <string name="archived_products">已归档产品</string>
+    <string name="new_product">新建产品</string>
+    <string name="edit_product">编辑产品</string>
+    <string name="search_products">搜索产品</string>
+    <string name="on_sale">促销中</string>
+    <string name="not_on_sale">非促销</string>
+    <string name="no_products_match">没有与“%1$s”匹配的产品。</string>
+    <string name="no_products_in_filter">“%1$s”中没有产品。</string>
+    <string name="no_archived_products">没有已归档的产品。</string>
+    <string name="no_products_yet">还没有产品。\n点击“新建产品”添加第一个产品。</string>
+    <string name="remove_product">移除产品</string>
+    <string name="product_removed_banner">该产品已移除。它仍会显示在过往订单中，但无法再添加到新订单。</string>
+    <string name="regular_price">原价</string>
+    <string name="sale_price">促销价</string>
+    <string name="price_change_note">价格修改仅适用于新订单。现有订单保持下单时的价格。</string>
+    <string name="remove_product_title">移除产品？</string>
+    <string name="remove_product_message">该产品将无法用于新订单，过往订单不受影响。你可以在“显示已归档”中恢复。</string>
+    <string name="error_product_name">请输入产品名称</string>
+    <string name="error_price">请输入有效价格，例如 12.50</string>
+    <string name="error_sale_price">请输入有效的促销价</string>
+    <string name="error_sale_price_too_high">促销价必须低于原价</string>
+
+    <!-- Sign in -->
+    <string name="sign_in_message">使用 Google 账户登录，即可备份并同步你的订单、客户和产品。</string>
+    <string name="sign_in_with_google">使用 Google 登录</string>
+    <string name="sign_in_failed">登录失败</string>
+
+    <!-- Settings -->
+    <string name="language">语言</string>
+    <string name="language_system_default">跟随手机</string>
+    <string name="currency">货币</string>
+    <string name="currency_usd">美元（%1$s · %2$s）</string>
+    <string name="currency_cad">加元（%1$s · %2$s）</string>
+    <string name="currency_cny">人民币（%1$s · %2$s）</string>
+    <string name="currency_note">仅更改货币符号，金额不会换算。</string>
+    <string name="account">账户</string>
+    <string name="signed_in_as">已登录：%1$s</string>
+    <string name="logout">退出登录</string>
+    <string name="logout_title">退出登录？</string>
+    <string name="logout_message">你的数据仍保存在账户中。重新登录即可查看。</string>
+    <string name="stay_logged_in">保持登录</string>
+</resources>

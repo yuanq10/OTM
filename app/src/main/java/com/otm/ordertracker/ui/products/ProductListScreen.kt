@@ -1,5 +1,8 @@
 package com.otm.ordertracker.ui.products
 
+
+import androidx.compose.ui.res.stringResource
+import com.otm.ordertracker.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,10 +54,10 @@ fun ProductListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.showArchived) "Archived products" else "Products") },
+                title = { Text(stringResource(if (state.showArchived) R.string.archived_products else R.string.products)) },
                 actions = {
                     TextButton(onClick = { viewModel.setShowArchived(!state.showArchived) }) {
-                        Text(if (state.showArchived) "Show active" else "Show archived")
+                        Text(stringResource(if (state.showArchived) R.string.show_active else R.string.show_archived))
                     }
                 },
             )
@@ -64,7 +67,7 @@ fun ProductListScreen(
                 ExtendedFloatingActionButton(
                     onClick = onAddProduct,
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text("New product") },
+                    text = { Text(stringResource(R.string.new_product)) },
                 )
             }
         },
@@ -77,12 +80,12 @@ fun ProductListScreen(
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::onQueryChange,
-                    placeholder = { Text("Search products") },
+                    placeholder = { Text(stringResource(R.string.search_products)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     trailingIcon = if (state.query.isNotEmpty()) {
                         {
                             IconButton(onClick = { viewModel.onQueryChange("") }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Clear search")
+                                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.clear_search))
                             }
                         }
                     } else null,
@@ -97,17 +100,17 @@ fun ProductListScreen(
                         FilterChip(
                             selected = state.filter == filter,
                             onClick = { viewModel.setFilter(filter) },
-                            label = { Text("${filter.label} (${state.counts[filter] ?: 0})") },
+                            label = { Text(stringResource(R.string.label_with_count, stringResource(filter.labelRes), state.counts[filter] ?: 0)) },
                         )
                     }
                 }
                 if (state.products.isEmpty()) {
                     EmptyState(
                         when {
-                            state.query.isNotBlank() -> "No products match \"${state.query.trim()}\"."
-                            state.filter != ProductFilter.ALL -> "No products in \"${state.filter.label}\"."
-                            state.showArchived -> "No archived products."
-                            else -> "No products yet.\nTap \"New product\" to add your first product."
+                            state.query.isNotBlank() -> stringResource(R.string.no_products_match, state.query.trim())
+                            state.filter != ProductFilter.ALL -> stringResource(R.string.no_products_in_filter, stringResource(state.filter.labelRes))
+                            state.showArchived -> stringResource(R.string.no_archived_products)
+                            else -> stringResource(R.string.no_products_yet)
                         }
                     )
                 } else {
@@ -117,7 +120,7 @@ fun ProductListScreen(
                                 headlineContent = { Text(product.name) },
                                 supportingContent = { ProductPrice(product) },
                                 trailingContent = if (product.archived) {
-                                    { TextButton(onClick = { viewModel.restore(product.id) }) { Text("Restore") } }
+                                    { TextButton(onClick = { viewModel.restore(product.id) }) { Text(stringResource(R.string.restore)) } }
                                 } else null,
                                 modifier = Modifier.clickable { onOpenProduct(product.id) },
                             )

@@ -10,6 +10,7 @@ A personal Android app for tracking orders, customers and products. Built with K
 - **Customers:** identified by first and last name. You can add, edit and remove them, and each customer has a full order history.
 - **Products:** add, edit and remove products. Prices are editable, and a product can be put on sale with a sale price.
 - **Removing** a customer or product archives it. Past orders keep showing it, but it can't be picked for new orders, and it can be restored from "Show archived".
+- **Settings:** choose the app language (same as phone, English, Français or 简体中文), choose the currency symbol shown on prices (US dollar, Canadian dollar or Chinese yuan; only the symbol changes, amounts aren't converted), and see which Google account you're signed in with, with a Logout button.
 
 ## One-time setup
 1. Install [Android Studio](https://developer.android.com/studio). It includes the JDK, Android SDK and emulator.
@@ -31,6 +32,9 @@ The tests cover money parsing and formatting, order totals (including sale price
 - An order must be shipped before it can be received.
 - Shipped can't be turned off while the order is received.
 - Canceled orders are read-only.
+
+## Translations
+All on-screen text lives in `app/src/main/res/values/strings.xml` (English), with translations in `values-fr/` (French) and `values-zh-rCN/` (Simplified Chinese). To add a string, add it to all three files. To add a language, create another `values-<language>/strings.xml`, list it in `res/xml/locales_config.xml`, and add it to the list in `ui/settings/SettingsScreen.kt`.
 
 ## Project layout
 - `app/src/main/java/com/otm/ordertracker/data/model/`: Customer, Product, Order, plus the order rules (`OrderRules`, `OrderFilter`)
