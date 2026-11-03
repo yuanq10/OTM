@@ -36,12 +36,12 @@ class MoneyTest {
     }
 
     @Test
-    fun currencyForRegion_picksSupportedCurrencies() {
-        assertEquals(AppCurrency.USD, AppCurrency.forRegion(Locale.US))
-        assertEquals(AppCurrency.CAD, AppCurrency.forRegion(Locale.CANADA_FRENCH))
-        assertEquals(AppCurrency.CNY, AppCurrency.forRegion(Locale.SIMPLIFIED_CHINESE))
-        assertNull("unsupported currency", AppCurrency.forRegion(Locale.GERMANY))
-        assertNull("no region", AppCurrency.forRegion(Locale.FRENCH))
+    fun currency_defaultsToUsd_andReadsSavedCodes() {
+        assertEquals(AppCurrency.USD, AppCurrency.DEFAULT)
+        assertEquals(AppCurrency.CAD, AppCurrency.fromCode("CAD"))
+        assertEquals(AppCurrency.CNY, AppCurrency.fromCode("cny"))
+        assertNull("unknown code", AppCurrency.fromCode("EUR"))
+        assertNull("never saved", AppCurrency.fromCode(null))
     }
 
     @Test

@@ -10,3 +10,9 @@ captures/
 .cxx/
 # Firebase config is project-specific; keep it out of git
 app/google-services.json
+
+# Release signing secrets and built APKs (never commit)
+keystore.properties
+*.jks
+*.keystore
+dist/

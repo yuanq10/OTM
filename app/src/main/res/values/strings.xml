@@ -137,6 +137,8 @@
     <string name="search_products">Search products</string>
     <string name="on_sale">On sale</string>
     <string name="not_on_sale">Not on sale</string>
+    <string name="in_stock">In stock</string>
+    <string name="out_of_stock">Out of stock</string>
     <string name="no_products_match">No products match \"%1$s\".</string>
     <string name="no_products_in_filter">No products in \"%1$s\".</string>
     <string name="no_archived_products">No archived products.</string>
@@ -160,7 +162,6 @@
 
     <!-- Settings -->
     <string name="language">Language</string>
-    <string name="language_system_default">Same as phone</string>
     <string name="currency">Currency</string>
     <!-- Currency name with its symbol and code, e.g. "US dollar ($ · USD)" -->
     <string name="currency_usd">US dollar (%1$s · %2$s)</string>

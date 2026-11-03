@@ -92,6 +92,21 @@ fun ProductPrice(product: Product, modifier: Modifier = Modifier) {
     }
 }
 
+/** "✓ In stock" or "Out of stock" badge, styled like order status badges. */
+@Composable
+fun ProductStockBadge(inStock: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    if (inStock) {
+        StatusBadge(
+            stringResource(R.string.badge_done, stringResource(R.string.in_stock)),
+            colors.primaryContainer,
+            colors.onPrimaryContainer,
+        )
+    } else {
+        StatusBadge(stringResource(R.string.out_of_stock), colors.errorContainer, colors.onErrorContainer)
+    }
+}
+
 @Composable
 fun InfoBanner(text: String, modifier: Modifier = Modifier, isError: Boolean = false) {
     val colors = MaterialTheme.colorScheme

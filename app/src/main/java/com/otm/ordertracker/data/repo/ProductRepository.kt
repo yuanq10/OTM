@@ -21,7 +21,7 @@ class ProductRepository(
     fun product(id: String): Flow<Product?> =
         collection().document(id).snapshotFlow().map { if (it.exists()) it.toProduct() else null }
 
-    fun add(name: String, priceCents: Long, salePriceCents: Long?): String {
+    fun add(name: String, priceCents: Long, salePriceCents: Long?, inStock: Boolean): String {
         val doc = collection().document()
         val now = System.currentTimeMillis()
         doc.set(
@@ -29,6 +29,7 @@ class ProductRepository(
                 "name" to name.trim(),
                 "priceCents" to priceCents,
                 "salePriceCents" to salePriceCents,
+                "inStock" to inStock,
                 "archived" to false,
                 "createdAt" to now,
                 "updatedAt" to now,
@@ -37,12 +38,13 @@ class ProductRepository(
         return doc.id
     }
 
-    fun update(id: String, name: String, priceCents: Long, salePriceCents: Long?) {
+    fun update(id: String, name: String, priceCents: Long, salePriceCents: Long?, inStock: Boolean) {
         collection().document(id).update(
             mapOf(
                 "name" to name.trim(),
                 "priceCents" to priceCents,
                 "salePriceCents" to salePriceCents,
+                "inStock" to inStock,
                 "updatedAt" to System.currentTimeMillis(),
             )
         ).logFailure("Update product")
@@ -57,6 +59,8 @@ class ProductRepository(
         name = getString("name").orEmpty(),
         priceCents = getLong("priceCents") ?: 0L,
         salePriceCents = getLong("salePriceCents"),
+        // Products saved before stock tracking count as in stock.
+        inStock = getBoolean("inStock") ?: true,
         archived = getBoolean("archived") ?: false,
         updatedAt = getLong("updatedAt") ?: 0L,
     )

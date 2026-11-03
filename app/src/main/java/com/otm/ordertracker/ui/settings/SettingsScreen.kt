@@ -1,7 +1,6 @@
 package com.otm.ordertracker.ui.settings
 
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,33 +33,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.core.os.LocaleListCompat
 import com.otm.ordertracker.OtmApp
 import com.otm.ordertracker.R
 import com.otm.ordertracker.data.settings.AppCurrency
+import com.otm.ordertracker.data.settings.AppLanguage
 import com.otm.ordertracker.ui.common.ConfirmDialog
 import com.otm.ordertracker.ui.common.Money
 
 /**
- * A language the app can be shown in. [tag] is a BCP 47 language tag; empty means "follow the phone".
- * Languages are listed by their own name (Français, 简体中文) so they're recognizable in any UI language.
+ * A language the app can be shown in, by its BCP 47 [tag]. Languages are listed by their own name
+ * (Français, 简体中文) so they're recognizable whatever language the app is in.
  */
-private data class LanguageOption(val tag: String, @StringRes val labelRes: Int? = null, val nativeName: String = "")
+private data class LanguageOption(val tag: String, val nativeName: String)
 
 private val languages = listOf(
-    LanguageOption("", labelRes = R.string.language_system_default),
-    LanguageOption("en", nativeName = "English"),
-    LanguageOption("fr", nativeName = "Français"),
-    LanguageOption("zh-CN", nativeName = "简体中文"),
+    LanguageOption("en", "English"),
+    LanguageOption("fr", "Français"),
+    LanguageOption("zh-CN", "简体中文"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(accountEmail: String?, onLogout: () -> Unit) {
-    // The app's chosen language ("" when following the phone). Changing it recreates the screen.
-    val current = remember { AppCompatDelegate.getApplicationLocales().toLanguageTags().substringBefore(',') }
+    // Changing the language recreates the screen, so reading it once is enough.
+    val currentLanguage = remember { AppLanguage.current() }
     val context = LocalContext.current
-    val currencyPreferences = remember { (context.applicationContext as OtmApp).container.currencyPreferences }
+    val settingsRepository = remember { (context.applicationContext as OtmApp).container.settingsRepository }
     var confirmLogout by remember { mutableStateOf(false) }
 
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.settings)) }) }) { padding ->
@@ -74,9 +72,13 @@ fun SettingsScreen(accountEmail: String?, onLogout: () -> Unit) {
             Text(stringResource(R.string.language), style = MaterialTheme.typography.titleMedium)
             RadioOptions(
                 options = languages,
-                isSelected = { it.tag.equals(current, ignoreCase = true) },
-                label = { option -> option.labelRes?.let { stringResource(it) } ?: option.nativeName },
-                onSelect = { applyLanguage(it.tag) },
+                isSelected = { it.tag.equals(currentLanguage, ignoreCase = true) },
+                label = { it.nativeName },
+                onSelect = { option ->
+                    // Saved with the account so it follows the user to other devices.
+                    settingsRepository.saveLanguage(option.tag)
+                    AppLanguage.apply(option.tag)
+                },
             )
 
             Text(
@@ -89,9 +91,9 @@ fun SettingsScreen(accountEmail: String?, onLogout: () -> Unit) {
                 isSelected = { it == Money.currency },
                 label = { currency -> stringResource(currency.labelRes, currency.symbol, currency.code) },
                 onSelect = { currency ->
-                    // Every price on screen updates right away; the choice is remembered on this device.
+                    // Every price on screen updates right away; the choice is saved with the account.
                     Money.currency = currency
-                    currencyPreferences.save(currency)
+                    settingsRepository.saveCurrency(currency)
                 },
             )
             Text(
@@ -176,10 +178,3 @@ private val AppCurrency.labelRes: Int
         AppCurrency.CAD -> R.string.currency_cad
         AppCurrency.CNY -> R.string.currency_cny
     }
-
-/** Switches the app's language; AppCompat stores the choice and recreates the screen in the new language. */
-private fun applyLanguage(tag: String) {
-    AppCompatDelegate.setApplicationLocales(
-        if (tag.isEmpty()) LocaleListCompat.getEmptyLocaleList() else LocaleListCompat.forLanguageTags(tag)
-    )
-}

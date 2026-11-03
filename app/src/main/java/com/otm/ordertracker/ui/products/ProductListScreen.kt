@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.otm.ordertracker.ui.AppViewModelProvider
 import com.otm.ordertracker.ui.common.EmptyState
 import com.otm.ordertracker.ui.common.ProductPrice
+import com.otm.ordertracker.ui.common.ProductStockBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +120,15 @@ fun ProductListScreen(
                         items(state.products, key = { it.id }) { product ->
                             ListItem(
                                 headlineContent = { Text(product.name) },
-                                supportingContent = { ProductPrice(product) },
+                                supportingContent = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        ProductPrice(product)
+                                        ProductStockBadge(product.inStock)
+                                    }
+                                },
                                 trailingContent = if (product.archived) {
                                     { TextButton(onClick = { viewModel.restore(product.id) }) { Text(stringResource(R.string.restore)) } }
                                 } else null,

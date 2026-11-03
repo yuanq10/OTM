@@ -18,6 +18,7 @@ data class ProductForm(
     val price: String = "",
     val onSale: Boolean = false,
     val salePrice: String = "",
+    val inStock: Boolean = true,
     @StringRes val nameError: Int? = null,
     @StringRes val priceError: Int? = null,
     @StringRes val salePriceError: Int? = null,
@@ -50,6 +51,7 @@ class ProductEditViewModel(
                             price = Money.toInput(product.priceCents),
                             onSale = product.onSale,
                             salePrice = product.salePriceCents?.let(Money::toInput).orEmpty(),
+                            inStock = product.inStock,
                         )
                         loaded = true
                     }
@@ -62,6 +64,7 @@ class ProductEditViewModel(
     fun onPriceChange(value: String) { form = form.copy(price = value, priceError = null) }
     fun onSaleChange(value: Boolean) { form = form.copy(onSale = value, salePriceError = null) }
     fun onSalePriceChange(value: String) { form = form.copy(salePrice = value, salePriceError = null) }
+    fun onInStockChange(value: Boolean) { form = form.copy(inStock = value) }
 
     /** Validates and saves. Returns true when saved. */
     fun save(): Boolean {
@@ -80,8 +83,8 @@ class ProductEditViewModel(
             return false
         }
 
-        if (productId == null) repository.add(form.name, price, salePrice)
-        else repository.update(productId, form.name, price, salePrice)
+        if (productId == null) repository.add(form.name, price, salePrice, form.inStock)
+        else repository.update(productId, form.name, price, salePrice, form.inStock)
         return true
     }
 

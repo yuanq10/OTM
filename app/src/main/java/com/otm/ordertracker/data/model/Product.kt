@@ -6,6 +6,8 @@ data class Product(
     val priceCents: Long = 0L,
     /** Null when the product is not on sale. */
     val salePriceCents: Long? = null,
+    /** Whether the product is currently available; shown as an In stock / Out of stock badge. */
+    val inStock: Boolean = true,
     /** Archived products stay in order history but can't be added to new orders. */
     val archived: Boolean = false,
     val updatedAt: Long = 0L,

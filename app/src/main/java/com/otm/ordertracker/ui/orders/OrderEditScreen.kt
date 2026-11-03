@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.otm.ordertracker.ui.common.Money
 import com.otm.ordertracker.ui.common.ProductPrice
+import com.otm.ordertracker.ui.common.ProductStockBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,7 +180,11 @@ fun OrderEditScreen(
 private fun ProductQuantityRow(line: ProductLine, quantity: Int, onQuantityChange: (Int) -> Unit) {
     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(line.name, style = MaterialTheme.typography.bodyLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(line.name, style = MaterialTheme.typography.bodyLarge)
+                // Out-of-stock products can still be ordered (e.g. pre-orders); the badge just flags it.
+                line.product?.let { ProductStockBadge(it.inStock) }
+            }
             if (line.locked || line.product == null) {
                 // Already on the order: show the price it was ordered at, and today's price if different.
                 val current = line.product?.effectivePriceCents

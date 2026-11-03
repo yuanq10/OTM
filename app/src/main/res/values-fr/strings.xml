@@ -133,6 +133,8 @@
     <string name="search_products">Rechercher des produits</string>
     <string name="on_sale">En promo</string>
     <string name="not_on_sale">Pas en promo</string>
+    <string name="in_stock">En stock</string>
+    <string name="out_of_stock">En rupture de stock</string>
     <string name="no_products_match">Aucun produit ne correspond à « %1$s ».</string>
     <string name="no_products_in_filter">Aucun produit dans « %1$s ».</string>
     <string name="no_archived_products">Aucun produit archivé.</string>
@@ -156,7 +158,6 @@
 
     <!-- Settings -->
     <string name="language">Langue</string>
-    <string name="language_system_default">Comme le téléphone</string>
     <string name="currency">Devise</string>
     <string name="currency_usd">Dollar américain (%1$s · %2$s)</string>
     <string name="currency_cad">Dollar canadien (%1$s · %2$s)</string>

@@ -131,6 +131,8 @@
     <string name="search_products">搜索产品</string>
     <string name="on_sale">促销中</string>
     <string name="not_on_sale">非促销</string>
+    <string name="in_stock">有货</string>
+    <string name="out_of_stock">缺货</string>
     <string name="no_products_match">没有与“%1$s”匹配的产品。</string>
     <string name="no_products_in_filter">“%1$s”中没有产品。</string>
     <string name="no_archived_products">没有已归档的产品。</string>
@@ -154,7 +156,6 @@
 
     <!-- Settings -->
     <string name="language">语言</string>
-    <string name="language_system_default">跟随手机</string>
     <string name="currency">货币</string>
     <string name="currency_usd">美元（%1$s · %2$s）</string>
     <string name="currency_cad">加元（%1$s · %2$s）</string>

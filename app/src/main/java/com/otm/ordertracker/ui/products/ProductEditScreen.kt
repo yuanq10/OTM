@@ -41,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.otm.ordertracker.ui.AppViewModelProvider
 import com.otm.ordertracker.ui.common.ConfirmDialog
 import com.otm.ordertracker.ui.common.InfoBanner
+import com.otm.ordertracker.ui.common.ProductStockBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,6 +108,13 @@ fun ProductEditScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.in_stock), style = MaterialTheme.typography.bodyLarge)
+                    ProductStockBadge(inStock = form.inStock)
+                }
+                Switch(checked = form.inStock, onCheckedChange = viewModel::onInStockChange)
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.on_sale), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Switch(checked = form.onSale, onCheckedChange = viewModel::onSaleChange)
